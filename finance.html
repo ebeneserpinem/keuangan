@@ -1,105 +1,128 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<title>Finance Dashboard</title>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-
-body{
-font-family:Arial;
-background:#0f172a;
-color:white;
-text-align:center;
-padding:40px;
-}
-
-button{
-padding:12px 20px;
-background:#38bdf8;
-border:none;
-border-radius:8px;
-cursor:pointer;
-}
-
-canvas{
-max-width:400px;
-margin:auto;
-}
-
-pre{
-background:#020617;
-padding:20px;
-border-radius:10px;
-margin-top:20px;
-}
-
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Keuangan</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; line-height: 1.6; }
+        .card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 2px 2px 5px #eee; }
+        input, select, button { width: 100%; padding: 10px; margin: 5px 0 15px 0; box-sizing: border-box; }
+        button { background: #007bff; color: white; border: none; cursor: pointer; font-weight: bold; }
+        button:hover { background: #0056b3; }
+        canvas { max-width: 100%; margin-top: 20px; }
+    </style>
 </head>
 <body>
 
-<h1>Finance Dashboard</h1>
+    <h2>💰 My Finance Tracker</h2>
 
-<button onclick="loadData()">Ambil Data</button>
+    <div class="card">
+        <h3>Input Transaksi</h3>
+        <form id="financeForm">
+            <label>Tanggal</label>
+            <input type="date" id="tanggal" required>
+            
+            <label>Deskripsi</label>
+            <input type="text" id="deskripsi" placeholder="Contoh: Gaji bulan ini" required>
+            
+            <label>Jumlah (Rp)</label>
+            <input type="number" id="jumlah" placeholder="100000" required>
+            
+            <label>Kategori</label>
+            <select id="kategori">
+                <option value="dana_darurat">Dana Darurat</option>
+                <option value="investasi">Investasi</option>
+            </select>
 
-<h2 id="total">Total: 0</h2>
+            <label>ID Unik (Email/ID)</label>
+            <input type="text" id="email_id" placeholder="user@mail.com" required>
 
-<canvas id="chart"></canvas>
+            <button type="submit" id="btnSimpan">Simpan Transaksi</button>
+        </form>
+    </div>
 
-<pre id="output">Belum ada data</pre>
+    <div class="card">
+        <h3>Ringkasan Dana</h3>
+        <button onclick="updateChart()">Refresh Data Grafik</button>
+        <canvas id="myChart"></canvas>
+    </div>
 
-<script>
+    <script>
+        const WORKER_URL = "https://finance-worker.ebeneserpinem6.workers.dev";
+        let myChart;
 
-let chart;
+        // 1. FUNGSI SIMPAN DATA (POST)
+        document.getElementById("financeForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById("btnSimpan");
+            btn.textContent = "Menyimpan...";
 
-async function loadData(){
+            const payload = {
+                tanggal: document.getElementById("tanggal").value,
+                deskripsi: document.getElementById("deskripsi").value,
+                jumlah: parseFloat(document.getElementById("jumlah").value),
+                kategori: document.getElementById("kategori").value,
+                email_id: document.getElementById("email_id").value
+            };
 
-const output=document.getElementById("output");
+            try {
+                const res = await fetch(WORKER_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                const result = await res.json();
 
-try{
+                if (result.status === "saved") {
+                    alert("✅ Berhasil disimpan!");
+                    document.getElementById("financeForm").reset();
+                    updateChart(); // Langsung update grafik setelah simpan
+                } else {
+                    alert("⚠️ Gagal: ID sudah terdaftar (Duplikat)");
+                }
+            } catch (err) {
+                alert("❌ Error koneksi: " + err);
+            } finally {
+                btn.textContent = "Simpan Transaksi";
+            }
+        });
 
-const response=await fetch(
-"https://finance-worker.ebeneserpinem6.workers.dev/api/data"
-);
+        // 2. FUNGSI AMBIL DATA & UPDATE CHART (GET)
+        async function updateChart() {
+            try {
+                const res = await fetch(`${WORKER_URL}/api/data`);
+                const data = await res.json();
 
-const data=await response.json();
+                const ctx = document.getElementById('myChart').getContext('2d');
+                
+                // Jika chart sudah ada, hancurkan dulu sebelum buat baru agar tidak tumpang tindih
+                if (myChart) myChart.destroy();
 
-output.textContent=JSON.stringify(data,null,2);
+                myChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Dana Darurat', 'Investasi'],
+                        datasets: [{
+                            data: [data.dana_darurat, data.investasi],
+                            backgroundColor: ['#ffc107', '#28a745']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error("Gagal memuat grafik:", err);
+            }
+        }
 
-document.getElementById("total").innerText=
-"Total: Rp "+data.total.toLocaleString("id-ID");
-
-const ctx=document.getElementById("chart");
-
-if(chart){
-chart.destroy();
-}
-
-chart=new Chart(ctx,{
-type:"pie",
-data:{
-labels:["Dana Darurat","Investasi"],
-datasets:[{
-data:[
-data.dana_darurat,
-data.investasi
-]
-}]
-}
-});
-
-}catch(e){
-
-output.textContent="Error:\n"+e;
-
-}
-
-}
-
-</script>
-
+        // Jalankan grafik saat pertama kali buka web
+        updateChart();
+    </script>
 </body>
 </html>
