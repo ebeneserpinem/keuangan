@@ -4,79 +4,79 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Cloudflare Worker Web</title>
+<title>Finance Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        background: #0f172a;
-        color: white;
-        text-align: center;
-        padding: 50px;
-    }
 
-    h1 {
-        color: #38bdf8;
-    }
+body{
+font-family:Arial;
+background:#0f172a;
+color:white;
+text-align:center;
+padding:40px;
+}
 
-    button {
-        padding: 12px 20px;
-        font-size: 16px;
-        border: none;
-        border-radius: 8px;
-        background: #38bdf8;
-        color: black;
-        cursor: pointer;
-    }
+canvas{
+max-width:400px;
+margin:auto;
+}
 
-    button:hover {
-        background: #0ea5e9;
-    }
+.card{
+background:#020617;
+padding:20px;
+border-radius:10px;
+margin:20px auto;
+width:300px;
+}
 
-    pre {
-        margin-top: 20px;
-        background: #020617;
-        padding: 20px;
-        border-radius: 10px;
-        text-align: left;
-        overflow-x: auto;
-    }
 </style>
 </head>
 
 <body>
 
-<h1>🚀 Cloudflare Worker Test</h1>
+<h1>Finance Dashboard</h1>
 
-<p>Klik tombol untuk mengambil data dari Worker API</p>
+<div class="card">
+<h3>Total Dana</h3>
+<h2 id="total">Loading...</h2>
+</div>
 
-<button onclick="loadData()">Ambil Data</button>
-
-<pre id="output">Belum ada data...</pre>
+<canvas id="chart"></canvas>
 
 <script>
-async function loadData() {
 
-    const output = document.getElementById("output");
-    output.textContent = "Loading...";
+async function loadChart(){
 
-    try {
+const res = await fetch(
+"https://finance-worker.ebeneserpinem6.workers.dev/api/data"
+);
 
-        // 🔴 GANTI URL INI DENGAN WORKER KAMU
-        const response = await fetch(
-            "finance-worker.ebeneserpinem6.workers.dev"
-        );
+const data = await res.json();
 
-        const data = await response.json();
+document.getElementById("total").innerText =
+"Rp "+data.total.toLocaleString("id-ID");
 
-        output.textContent =
-            JSON.stringify(data, null, 2);
+const ctx=document.getElementById("chart");
 
-    } catch (error) {
-        output.textContent =
-            "Error koneksi ke Worker:\n" + error;
-    }
+new Chart(ctx,{
+type:"pie",
+data:{
+labels:["Dana Darurat","Investasi"],
+datasets:[{
+data:[
+data.dana_darurat,
+data.investasi
+]
+}]
 }
+});
+
+}
+
+loadChart();
+
 </script>
 
 </body>
