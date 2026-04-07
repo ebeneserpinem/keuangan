@@ -3,376 +3,325 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sentinel Finance</title>
 
-<title>Finance Dashboard</title>
-
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2pdf.js"></script>
 
 <style>
-
-body{
-font-family:system-ui;
-background:#0f172a;
-color:white;
-margin:0;
-padding:20px;
+:root{
+ --brand:#6366f1;
+ --success:#10b981;
+ --danger:#f43f5e;
+ --bg:#0b0f1a;
+ --card:rgba(23,28,48,.7);
+ --border:rgba(255,255,255,.08);
+ --text:#f8fafc;
+ --muted:#94a3b8;
 }
 
-.container{max-width:1100px;margin:auto}
-
-h2{margin-bottom:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+font-family:'Plus Jakarta Sans',sans-serif;
+background:var(--bg);
+color:var(--text);
+padding:30px;
+}
 
 .card{
-background:#1e293b;
-padding:18px;
-border-radius:14px;
-margin-bottom:15px;
-box-shadow:0 0 15px rgba(0,0,0,.3);
+background:var(--card);
+border:1px solid var(--border);
+border-radius:20px;
+padding:25px;
+margin-bottom:20px;
+backdrop-filter:blur(12px);
 }
 
-.grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:15px;
-}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px}
 
-.value{
-font-size:26px;
-font-weight:bold;
-margin-top:8px;
-}
+.value{font-size:28px;font-weight:800}
 
-input,select,button{
-padding:10px;
-border-radius:8px;
-border:none;
-margin:5px 0;
+input,select{
+background:#111827;
+border:1px solid var(--border);
+padding:12px;
+border-radius:10px;
+color:white;
 }
 
 button{
-background:#22c55e;
+background:var(--brand);
+border:none;
+padding:12px;
+border-radius:10px;
 color:white;
+font-weight:700;
 cursor:pointer;
 }
 
-button:hover{opacity:.85}
+table{width:100%;border-collapse:collapse}
+th,td{padding:14px;border-bottom:1px solid var(--border)}
+th{color:var(--muted);font-size:12px;text-align:left}
 
-table{
-width:100%;
-border-collapse:collapse;
-margin-top:10px;
-}
-
-th,td{
-padding:10px;
-border-bottom:1px solid #334155;
-font-size:14px;
-}
-
-th{color:#94a3b8;text-align:left}
-
-canvas{
-max-height:260px;
-}
-
-.qris{color:#22c55e;font-weight:bold}
-.transfer{color:#38bdf8;font-weight:bold}
-
-.logout{
-float:right;
-background:#ef4444;
-}
-
+.smallChart{height:180px}
 </style>
 </head>
 
 <body>
 
-<div class="container" id="pdfArea">
+<div id="login">
+<div class="card" style="max-width:320px;margin:auto;text-align:center">
+<h2>Sentinel Login</h2>
+<input type="password" id="pass" placeholder="Password">
+<br><br>
+<button onclick="login()">LOGIN</button>
+</div>
+</div>
 
-<h2>
-Dashboard Keuangan
-<button class="logout" onclick="logout()">Logout</button>
-</h2>
+<div id="app" style="display:none">
 
-<!-- SUMMARY -->
+<div class="grid">
+<div class="card">
+<div>Total Aset</div>
+<div id="asset" class="value">Rp 0</div>
+</div>
+
+<div class="card">
+<div>Pengeluaran</div>
+<div id="exp" class="value" style="color:var(--danger)">Rp 0</div>
+</div>
+
+<div class="card">
+<div>Saldo Bersih</div>
+<div id="net" class="value" style="color:var(--brand)">Rp 0</div>
+</div>
+</div>
+
 <div class="grid">
 
 <div class="card">
-Total Aset
-<div class="value" id="v-asset">Rp0</div>
+<h4>Progress Dana Darurat</h4>
+<canvas id="pie"></canvas>
+</div>
+
+<div class="card smallChart">
+<h4>Tren Saldo</h4>
+<canvas id="line"></canvas>
+</div>
+
 </div>
 
 <div class="card">
-Pengeluaran
-<div class="value" id="v-exp">Rp0</div>
-</div>
-
-<div class="card">
-Saldo Bersih
-<div class="value" id="v-net">Rp0</div>
-</div>
-
-</div>
-
-<!-- INPUT -->
-<div class="card">
-<h3>Tambah Transaksi</h3>
+<h4>Tambah Transaksi</h4>
 
 <select id="kat">
-<option value="saldo_net">Saldo</option>
+<option value="pemasukan">Pemasukan</option>
 <option value="pengeluaran">Pengeluaran</option>
 <option value="dana_darurat">Dana Darurat</option>
-<option value="investasi">Investasi</option>
 </select>
 
-<input id="tujuan" placeholder="Tujuan / Rekening">
+<input id="desc" placeholder="Keterangan">
+<input id="amt" type="number" placeholder="Nominal">
 
-<input id="jumlah" type="number" placeholder="Nominal">
-
-<button onclick="tambah()">Tambah</button>
+<button onclick="tambah()">Simpan</button>
 </div>
 
-<!-- FILTER -->
 <div class="card">
-Filter Bulan:
-<select id="bulan" onchange="renderTable()">
-<option value="all">Semua</option>
+<select id="bulan" onchange="render()">
+<option value="all">SEMUA BULAN</option>
 </select>
 
-<button onclick="downloadPDF()">Download PDF</button>
-</div>
-
-<!-- GRAFIK -->
-<div class="grid">
-
-<div class="card">
-<canvas id="lineChart"></canvas>
-</div>
-
-<div class="card">
-<canvas id="pieChart"></canvas>
-</div>
-
-</div>
-
-<!-- TABLE -->
-<div class="card">
 <table>
 <thead>
 <tr>
 <th>Tanggal</th>
-<th>Waktu</th>
 <th>Kategori</th>
-<th>Metode</th>
-<th>Tujuan</th>
-<th style="text-align:right">Nominal</th>
-<th>Aksi</th>
+<th>Deskripsi</th>
+<th>Nominal</th>
+<th></th>
 </tr>
 </thead>
-<tbody id="table"></tbody>
+<tbody id="tbody"></tbody>
 </table>
 </div>
 
 </div>
 
 <script>
+const API="https://finance-worker.ebeneserpinem6.workers.dev";
 
-/* ================= CONFIG ================= */
+let dataRaw=[];
+let pie,line;
+let idleTimer;
 
-const API="https://API-WORKER-KAMU.workers.dev"
+/* ================= LOGIN ================= */
+
+function login(){
+if(pass.value==="12345"){
+document.getElementById('login').style.display='none';
+app.style.display='block';
+startIdle();
+load();
+}else alert("Password salah");
+}
 
 /* ===== AUTO LOGOUT 3 MENIT ===== */
 
-let timer
-function resetTimer(){
-clearTimeout(timer)
-timer=setTimeout(logout,180000)
-}
-document.onclick=resetTimer
-document.onmousemove=resetTimer
-resetTimer()
-
-function logout(){
-alert("Session habis")
-location.reload()
+function startIdle(){
+resetIdle();
+['click','mousemove','keydown'].forEach(e=>{
+document.addEventListener(e,resetIdle);
+});
 }
 
-/* ===== FORMAT ===== */
-
-function rupiah(n){
-return "Rp"+Number(n).toLocaleString("id-ID")
+function resetIdle(){
+clearTimeout(idleTimer);
+idleTimer=setTimeout(()=>location.reload(),180000);
 }
 
-/* ===== DATA ===== */
+/* ================= LOAD ================= */
 
-let raw=[]
+async function load(){
+const res=await fetch(API+"/api/transaksi");
+dataRaw=await res.json();
 
-async function refresh(){
-
-const d=await fetch(API+"/api/data").then(r=>r.json())
-
-document.getElementById("v-asset").innerText=
-rupiah((d.dana_darurat||0)+(d.investasi||0))
-
-document.getElementById("v-exp").innerText=
-rupiah(d.pengeluaran||0)
-
-document.getElementById("v-net").innerText=
-rupiah(d.saldo_net_display||0)
-
-loadTransaksi(d)
-
+buildMonth();
+render();
+updateSummary();
 }
 
-/* ===== LOAD TRANSAKSI ===== */
+/* ================= SUMMARY ================= */
 
-async function loadTransaksi(){
+function updateSummary(){
 
-raw=await fetch(API+"/api/transaksi").then(r=>r.json())
+let asset=0,exp=0;
 
-buatFilterBulan()
-renderTable()
-updateCharts()
+dataRaw.forEach(t=>{
+if(t.kategori==="pengeluaran") exp+=Number(t.jumlah);
+else asset+=Number(t.jumlah);
+});
 
+assetEl(asset);
+assetEl(exp,'exp');
+assetEl(asset-exp,'net');
+
+updateCharts();
 }
 
-/* ===== FILTER BULAN ===== */
-
-function buatFilterBulan(){
-
-const set=new Set()
-
-raw.forEach(t=>{
-const d=new Date(t.tanggal)
-set.add(`${d.getFullYear()}-${d.getMonth()+1}`)
-})
-
-const select=document.getElementById("bulan")
-
-select.innerHTML=`<option value="all">Semua</option>`
-
-set.forEach(v=>{
-select.innerHTML+=`<option value="${v}">${v}</option>`
-})
-
+function assetEl(val,id="asset"){
+document.getElementById(id).innerText=
+"Rp "+val.toLocaleString('id-ID');
 }
 
-/* ===== RENDER TABLE FORMAT LAMA ===== */
-
-function renderTable(){
-
-const f=document.getElementById("bulan").value
-
-const data=raw.filter(t=>{
-if(f==="all")return true
-const d=new Date(t.tanggal)
-return `${d.getFullYear()}-${d.getMonth()+1}`===f
-})
-
-document.getElementById("table").innerHTML=
-data.map(t=>{
-
-const date=new Date(t.tanggal)
-
-const metode=(t.deskripsi||"").toLowerCase()
-.includes("qris")?"QRIS":"Transfer"
-
-return`
-<tr>
-<td>${date.toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit'})}</td>
-<td>${date.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}</td>
-<td>${t.kategori}</td>
-<td class="${metode==='QRIS'?'qris':'transfer'}">${metode}</td>
-<td>${t.tujuan||"-"}</td>
-<td style="text-align:right">${rupiah(t.jumlah)}</td>
-<td><button onclick="hapus('${t.id}')">Hapus</button></td>
-</tr>
-`
-
-}).join("")
-
-}
-
-/* ===== TAMBAH ===== */
-
-async function tambah(){
-
-await fetch(API+"/api/tambah",{
-method:"POST",
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify({
-kategori:kat.value,
-tujuan:tujuan.value,
-jumlah:Number(jumlah.value),
-email_id:"user@mail.com"
-})
-})
-
-refresh()
-}
-
-/* ===== HAPUS ===== */
-
-async function hapus(id){
-
-if(!confirm("Hapus transaksi?"))return
-
-await fetch(API+"/api/hapus/"+id,{method:"DELETE"})
-refresh()
-
-}
-
-/* ===== CHART ===== */
-
-let line,pie
+/* ================= CHART ================= */
 
 function updateCharts(){
 
-const saldo=raw.filter(t=>t.kategori==="saldo_net")
-.map(t=>t.jumlah)
+/* ==== PIE TARGET DANA DARURAT ==== */
 
-const label=saldo.map((_,i)=>i+1)
-
-if(line)line.destroy()
-
-line=new Chart(lineChart,{
-type:'line',
-data:{labels:label,datasets:[{data:saldo}]}
-})
-
-const darurat=raw
+const dana=dataRaw
 .filter(t=>t.kategori==="dana_darurat")
-.reduce((a,b)=>a+b.jumlah,0)
+.reduce((a,b)=>a+Number(b.jumlah),0);
 
-const investasi=raw
-.filter(t=>t.kategori==="investasi")
-.reduce((a,b)=>a+b.jumlah,0)
+const TARGET=30000000;
+const sisa=Math.max(TARGET-dana,0);
 
-if(pie)pie.destroy()
+if(pie) pie.destroy();
 
-pie=new Chart(pieChart,{
+pie=new Chart(pieCanvas,{
 type:'pie',
 data:{
-labels:['Dana Darurat','Investasi'],
-datasets:[{data:[darurat,investasi]}]
+labels:['Terkumpul','Sisa Target'],
+datasets:[{data:[dana,sisa]}]
 }
+});
+
+/* ==== LINE ==== */
+
+let bal=0;
+const sorted=[...dataRaw].sort((a,b)=>new Date(a.tanggal)-new Date(b.tanggal));
+
+const pts=sorted.map(t=>{
+bal+=t.kategori==="pengeluaran"?-t.jumlah:t.jumlah;
+return bal;
+});
+
+if(line) line.destroy();
+
+line=new Chart(lineCanvas,{
+type:'line',
+data:{labels:pts.map(()=>''),datasets:[{data:pts}]},
+options:{plugins:{legend:{display:false}},scales:{x:{display:false},y:{display:false}}}
+});
+}
+
+/* ================= BULAN ================= */
+
+function buildMonth(){
+const set=new Set();
+
+dataRaw.forEach(t=>{
+const d=new Date(t.tanggal);
+set.add(d.getFullYear()+"-"+(d.getMonth()+1));
+});
+
+bulan.innerHTML='<option value="all">SEMUA BULAN</option>';
+
+[...set].sort().reverse().forEach(m=>{
+bulan.innerHTML+=`<option value="${m}">${m}</option>`;
+});
+}
+
+/* ================= TABLE ================= */
+
+function render(){
+
+const f=bulan.value;
+
+const list=dataRaw.filter(t=>{
+if(f==="all") return true;
+const d=new Date(t.tanggal);
+return d.getFullYear()+"-"+(d.getMonth()+1)===f;
+});
+
+tbody.innerHTML=list.map(t=>`
+<tr>
+<td>${new Date(t.tanggal).toLocaleDateString()}</td>
+<td>${t.kategori}</td>
+<td>${t.deskripsi}</td>
+<td>Rp ${Number(t.jumlah).toLocaleString('id-ID')}</td>
+<td><button onclick="hapus('${t.id}')">X</button></td>
+</tr>
+`).join('');
+}
+
+/* ================= TAMBAH ================= */
+
+async function tambah(){
+await fetch(API+"/api/tambah",{
+method:"POST",
+body:JSON.stringify({
+deskripsi:desc.value,
+jumlah:Number(amt.value),
+kategori:kat.value,
+email_id:"user@mail.com"
 })
+});
 
+desc.value="";
+amt.value="";
+load();
 }
 
-/* ===== PDF ===== */
+/* ================= HAPUS ================= */
 
-function downloadPDF(){
-html2pdf().from(document.getElementById("pdfArea"))
-.save("laporan.pdf")
+async function hapus(id){
+if(!confirm("Hapus transaksi?"))return;
+
+await fetch(API+"/api/hapus?id="+id,{method:"DELETE"});
+load();
 }
-
-/* START */
-refresh()
 
 </script>
-
 </body>
 </html>
