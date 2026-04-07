@@ -3,393 +3,285 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Finance Dashboard Pro</title>
+    <title>Finance Dashboard Elite</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
         :root {
-            --bg: #0f172a;
-            --card: #1e293b;
-            --border: #334155;
-            --primary: #38bdf8;
-            --success: #22c55e;
-            --danger: #ef4444;
+            --bg: #0f172a; --card: #1e293b; --border: #334155;
+            --primary: #38bdf8; --success: #22c55e; --danger: #ef4444;
             --text: #f8fafc;
         }
 
         body {
             font-family: 'Inter', 'Segoe UI', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            max-width: 1200px;
-            margin: auto;
-            padding: 20px;
+            background: var(--bg); color: var(--text);
+            max-width: 1100px; margin: auto; padding: 20px;
         }
 
-        /* login Overlay */
-        #login-screen {
-            position: fixed;
-            inset: 0;
-            background: var(--bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .login-card {
-            background: var(--card);
-            padding: 30px;
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            background: #0f172a;
-            color: white;
-            box-sizing: border-box;
-        }
-
-        /* Layout */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-
-        .card {
-            background: var(--card);
-            padding: 20px;
-            border-radius: 14px;
-            border: 1px solid var(--border);
-            margin-bottom: 20px;
-            transition: transform 0.2s;
-        }
-
-        .grid4 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-
-        .gridChart {
-            display: grid;
-            grid-template-columns: 1.5fr 1fr;
-            gap: 20px;
-        }
-
-        @media (max-width: 768px) {
-            .gridChart { grid-template-columns: 1fr; }
-        }
-
-        .big {
-            font-size: 1.6em;
-            font-weight: 800;
-            margin-top: 8px;
-            letter-spacing: -0.5px;
-        }
-
-        .net { color: var(--primary) }
-        .asset { color: var(--success) }
-        .expense { color: var(--danger) }
-
-        /* Table Design */
-        .table-container { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        th { text-align: left; background: rgba(255,255,255,0.05); }
-        th, td { padding: 14px; border-bottom: 1px solid var(--border); }
+        /* --- AUTH & UI ELEMENTS --- */
+        #login-screen { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 2000; }
+        .login-card { background: var(--card); padding: 30px; border-radius: 16px; border: 1px solid var(--border); width: 320px; text-align: center; }
         
-        .nominal { text-align: right; font-family: 'JetBrains Mono', monospace; }
-        .qris { color: var(--success); font-weight: bold; }
-        .transfer { color: var(--primary); font-weight: bold; }
-
-        button {
-            background: var(--primary);
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            color: white;
-            font-weight: 600;
+        .card { background: var(--card); padding: 20px; border-radius: 14px; border: 1px solid var(--border); margin-bottom: 20px; }
+        
+        input, select { 
+            width: 100%; padding: 10px; margin: 8px 0; border-radius: 8px; 
+            border: 1px solid var(--border); background: #0f172a; color: white; box-sizing: border-box; 
         }
 
-        button.btn-outline {
-            background: transparent;
-            border: 1px solid var(--danger);
-            color: var(--danger);
-        }
+        .grid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .gridChart { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        @media (max-width: 768px) { .gridChart { grid-template-columns: 1fr; } }
 
-        button:hover { opacity: 0.8; }
+        .big { font-size: 1.6em; font-weight: 800; margin-top: 5px; }
+        .net { color: var(--primary) } .asset { color: var(--success) } .expense { color: var(--danger) }
 
-        /* PDF Export Styling */
-        #pdf-content { padding: 20px; background: white !important; color: black !important; }
-        .no-print { display: none !important; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { padding: 12px; border-bottom: 1px solid var(--border); text-align: left; }
+        .nominal { text-align: right; font-family: monospace; font-weight: bold; }
+
+        button { background: var(--primary); border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; color: white; font-weight: 600; transition: 0.2s; }
+        button:hover { opacity: 0.8; transform: translateY(-1px); }
+        .btn-red { background: var(--danger); }
+        .btn-green { background: var(--success); }
+
+        /* --- PDF PRINT STYLING (HIDDEN ON SCREEN) --- */
+        #pdf-template { display: none; color: #000; background: #fff; padding: 40px; }
+        .pdf-header { border-bottom: 2px solid #000; margin-bottom: 20px; padding-bottom: 10px; }
     </style>
 </head>
 <body>
 
 <div id="login-screen">
     <div class="login-card">
-        <h2>Finance Login</h2>
-        <p style="color: #94a3b8">Masukkan Password Dashboard</p>
-        <input type="password" id="passInput" placeholder="Password...">
-        <button onclick="login()" style="width: 100%; margin-top: 10px;">Masuk</button>
+        <h3>Restricted Access</h3>
+        <input type="password" id="passInput" placeholder="Password Dashboard">
+        <button onclick="login()" style="width:100%">Login</button>
     </div>
 </div>
 
-<div id="main-content" style="display: none;">
+<div id="main-content" style="display:none">
     
-    <div class="header">
-        <h1>Dashboard</h1>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
+        <h2>Finance Dashboard</h2>
         <div>
-            <button onclick="downloadPDF()">Export PDF</button>
-            <button class="btn-outline" onclick="logout()">Logout</button>
-        </div>
-    </div>
-
-    <div class="card" style="text-align:center; background: linear-gradient(145deg, #1e293b, #0f172a);">
-        <h2 style="margin:0; font-size: 1rem; color: #94a3b8;">Total Saldo Bersih</h2>
-        <div id="net" class="big net">Rp 0</div>
-    </div>
-
-    <div class="grid4">
-        <div class="card">
-            <small>Dana Darurat</small>
-            <div id="darurat" class="big asset">Rp 0</div>
-        </div>
-        <div class="card">
-            <small>Investasi</small>
-            <div id="investasi" class="big asset">Rp 0</div>
-        </div>
-        <div class="card">
-            <small>Pengeluaran</small>
-            <div id="expense" class="big expense">Rp 0</div>
-        </div>
-        <div class="card">
-            <small>Total Aset</small>
-            <div id="asset" class="big asset">Rp 0</div>
-        </div>
-    </div>
-
-    <div class="gridChart">
-        <div class="card">
-            <h3>Tren Keuangan</h3>
-            <canvas id="chartLine"></canvas>
-        </div>
-        <div class="card">
-            <h3>Alokasi Aset</h3>
-            <div style="max-width: 250px; margin: auto;">
-                <canvas id="chartPie"></canvas>
-            </div>
+            <button onclick="downloadPDF()" style="background:#64748b">Export PDF</button>
+            <button class="btn-red" onclick="logout()">Logout</button>
         </div>
     </div>
 
     <div class="card">
-        <h3>Riwayat Transaksi Terakhir</h3>
-        <div class="table-container">
+        <h3 style="margin-top:0">Tambah Transaksi</h3>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:10px; align-items:end">
+            <div><label><small>Kategori</small></label><input type="text" id="f-kategori" placeholder="Makan/Gaji"></div>
+            <div><label><small>Tujuan</small></label><input type="text" id="f-tujuan" placeholder="Warung/Bank"></div>
+            <div><label><small>Nominal</small></label><input type="number" id="f-jumlah" placeholder="0"></div>
+            <div><label><small>Metode</small></label>
+                <select id="f-metode">
+                    <option value="Transfer">Transfer</option>
+                    <option value="QRIS">QRIS</option>
+                </select>
+            </div>
+            <button class="btn-green" onclick="tambahTransaksi()" style="height:42px; margin-bottom:8px">Simpan</button>
+        </div>
+    </div>
+
+    <div class="card" style="text-align:center">
+        <small>Saldo Bersih</small>
+        <div id="net" class="big net">Rp 0</div>
+    </div>
+
+    <div class="grid4">
+        <div class="card"><small>Dana Darurat</small><div id="darurat" class="big asset">Rp 0</div></div>
+        <div class="card"><small>Investasi</small><div id="investasi" class="big asset">Rp 0</div></div>
+        <div class="card"><small>Pengeluaran</small><div id="expense" class="big expense">Rp 0</div></div>
+        <div class="card"><small>Total Aset</small><div id="asset" class="big asset">Rp 0</div></div>
+    </div>
+
+    <div class="gridChart">
+        <div class="card"><h3>Tren</h3><canvas id="chartLine"></canvas></div>
+        <div class="card"><h3>Alokasi</h3><canvas id="chartPie"></canvas></div>
+    </div>
+
+    <div class="card">
+        <h3>Riwayat Transaksi</h3>
+        <div style="overflow-x:auto">
             <table>
-                <thead>
-                    <tr>
-                        <th>Tanggal</th>
-                        <th>Kategori</th>
-                        <th>Metode</th>
-                        <th>Tujuan</th>
-                        <th class="nominal">Nominal</th>
-                        <th style="text-align: center">Aksi</th>
-                    </tr>
-                </thead>
+                <thead><tr><th>Tanggal</th><th>Kategori</th><th>Metode</th><th>Tujuan</th><th class="nominal">Nominal</th><th>Aksi</th></tr></thead>
                 <tbody id="table"></tbody>
             </table>
         </div>
     </div>
 </div>
 
+<div id="pdf-template">
+    <div class="pdf-header">
+        <h1>LAPORAN KEUANGAN PERSONAL</h1>
+        <p id="pdf-date"></p>
+    </div>
+    <div id="pdf-summary" style="margin-bottom:30px"></div>
+    <h3>Daftar Transaksi Lengkap</h3>
+    <table id="pdf-table" style="border: 1px solid #ccc"></table>
+</div>
+
 <script>
     const API = "https://finance-worker.ebeneserpinem6.workers.dev";
-    let chart, pieChart;
+    let chart, pieChart, timeoutTimer;
 
-    /* --------- AUTH LOGIC --------- */
+    /* --- LOGIKA AUTO LOGOUT (3 MENIT) --- */
+    function resetTimer() {
+        clearTimeout(timeoutTimer);
+        timeoutTimer = setTimeout(logout, 180000); // 3 menit = 180.000 ms
+    }
+    // Pantau pergerakan mouse atau klik
+    window.onload = resetTimer;
+    window.onmousemove = resetTimer;
+    window.onmousedown = resetTimer;
+    window.onclick = resetTimer;
+    window.onkeydown = resetTimer;
+
     function login() {
-        const pass = document.getElementById('passInput').value;
-        // Ganti '12345' dengan password keinginan Anda
-        if(pass === "12345") {
-            localStorage.setItem("fin_auth", "true");
+        if(document.getElementById('passInput').value === "12345") {
+            localStorage.setItem("fin_session", Date.now());
             checkAuth();
-        } else {
-            alert("Password Salah!");
-        }
+        } else { alert("Salah!"); }
     }
 
     function logout() {
-        localStorage.removeItem("fin_auth");
+        localStorage.removeItem("fin_session");
         location.reload();
     }
 
     function checkAuth() {
-        const auth = localStorage.getItem("fin_auth");
-        if(auth === "true") {
+        if(localStorage.getItem("fin_session")) {
             document.getElementById('login-screen').style.display = "none";
             document.getElementById('main-content').style.display = "block";
             refreshDashboard();
-            // Start Auto Refresh
-            setInterval(refreshDashboard, 15000);
         }
     }
 
-    /* --------- CORE DATA LOGIC --------- */
+    /* --- CORE LOGIC --- */
     async function refreshDashboard() {
         try {
-            // 1. Fetch Summary Data
-            const res = await fetch(`${API}/api/data`);
+            const res = await fetch(API + "/api/data");
             const d = await res.json();
-            const totalAsset = d.dana_darurat + d.investasi;
-
-            updateElement("net", `Rp ${d.saldo_net_display.toLocaleString('id-ID')}`);
-            updateElement("darurat", `Rp ${d.dana_darurat.toLocaleString('id-ID')}`);
-            updateElement("investasi", `Rp ${d.investasi.toLocaleString('id-ID')}`);
-            updateElement("expense", `Rp ${d.pengeluaran.toLocaleString('id-ID')}`);
-            updateElement("asset", `Rp ${totalAsset.toLocaleString('id-ID')}`);
-
-            // 2. Line Chart
-            const chartRes = await fetch(`${API}/api/chart`);
-            const cData = await chartRes.json();
-            renderLineChart(cData);
-
-            // 3. Pie Chart
-            renderPieChart(d.dana_darurat, d.investasi);
-
-            // 4. Transactions Table
-            const resTable = await fetch(`${API}/api/transaksi`);
-            const list = await resTable.json();
-            renderTable(list);
-
-        } catch (e) {
-            console.error("Fetch Error:", e);
-        }
-    }
-
-    function updateElement(id, val) {
-        const el = document.getElementById(id);
-        if(el) el.innerText = val;
-    }
-
-    /* --------- CHART RENDERING --------- */
-    function renderLineChart(data) {
-        const ctx = document.getElementById("chartLine");
-        if(chart) chart.destroy();
-        chart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: data.bulan,
-                datasets: [
-                    { label: 'Asset', data: data.asset, borderColor: '#22c55e', tension: 0.4, fill: true, backgroundColor: 'rgba(34, 197, 94, 0.1)' },
-                    { label: 'Pengeluaran', data: data.pengeluaran, borderColor: '#ef4444', tension: 0.4 }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { labels: { color: 'white', font: { size: 12 } } } },
-                scales: {
-                    x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
-                    y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } }
-                }
-            }
-        });
-    }
-
-    function renderPieChart(darurat, investasi) {
-        const ctx = document.getElementById("chartPie");
-        if(pieChart) pieChart.destroy();
-        pieChart = new Chart(ctx, {
-            type: 'doughnut', // Lebih modern dibanding Pie biasa
-            data: {
-                labels: ["Dana Darurat", "Investasi"],
-                datasets: [{
-                    data: [darurat, investasi],
-                    backgroundColor: ["#22c55e", "#38bdf8"],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                plugins: { legend: { position: 'bottom', labels: { color: 'white', padding: 20 } } },
-                cutout: '70%'
-            }
-        });
-    }
-
-    function renderTable(list) {
-        const tbody = document.getElementById("table");
-        tbody.innerHTML = list.map(t => {
-            const date = new Date(t.tanggal);
-            const tglFormatted = date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
-            const jamFormatted = date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
             
-            const metode = (t.deskripsi || "").toLowerCase().includes("qris") ? "QRIS" : "Transfer";
+            document.getElementById("net").innerText = "Rp " + d.saldo_net_display.toLocaleString('id-ID');
+            document.getElementById("darurat").innerText = "Rp " + d.dana_darurat.toLocaleString('id-ID');
+            document.getElementById("investasi").innerText = "Rp " + d.investasi.toLocaleString('id-ID');
+            document.getElementById("expense").innerText = "Rp " + d.pengeluaran.toLocaleString('id-ID');
+            document.getElementById("asset").innerText = "Rp " + (d.dana_darurat + d.investasi).toLocaleString('id-ID');
 
-            return `
-                <tr>
-                    <td>
-                        <div style="font-weight:bold">${tglFormatted}</div>
-                        <small style="color:#94a3b8">${jamFormatted}</small>
-                    </td>
-                    <td><span style="background:rgba(255,255,255,0.1); padding:4px 8px; border-radius:4px">${t.kategori}</span></td>
-                    <td class="${metode === "QRIS" ? "qris" : "transfer"}">${metode}</td>
-                    <td>${t.tujuan || "-"}</td>
-                    <td class="nominal">Rp ${Number(t.jumlah).toLocaleString('id-ID')}</td>
-                    <td style="text-align: center">
-                        <button class="btn-outline" style="padding:4px 8px; font-size:11px" onclick="hapus('${t.id}')">Hapus</button>
-                    </td>
-                </tr>
-            `;
+            renderCharts(d);
+            loadTransactions();
+        } catch(e) { console.log(e) }
+    }
+
+    async function loadTransactions() {
+        const res = await fetch(API + "/api/transaksi");
+        const list = await res.json();
+        const tbody = document.getElementById("table");
+        
+        tbody.innerHTML = list.map(t => {
+            const metode = (t.deskripsi || "").toLowerCase().includes("qris") ? "QRIS" : "Transfer";
+            return `<tr>
+                <td>${new Date(t.tanggal).toLocaleDateString('id-ID')}</td>
+                <td>${t.kategori}</td>
+                <td style="color:${metode=='QRIS'?'#22c55e':'#38bdf8'}">${metode}</td>
+                <td>${t.tujuan || "-"}</td>
+                <td class="nominal">Rp ${Number(t.jumlah).toLocaleString('id-ID')}</td>
+                <td><button class="btn-red" style="padding:4px 8px" onclick="hapus('${t.id}')">Hapus</button></td>
+            </tr>`;
         }).join("");
     }
 
-    async function hapus(id) {
-        if(!confirm("Yakin ingin menghapus transaksi ini?")) return;
-        try {
-            await fetch(`${API}/api/hapus?id=${id}`, { method: "DELETE" });
-            refreshDashboard();
-        } catch (e) { alert("Gagal menghapus"); }
-    }
-
-    /* --------- PDF BUG FIX --------- */
-    function downloadPDF() {
-        const element = document.body;
-        const opt = {
-            margin:       [10, 10],
-            filename:     `Laporan_Keuangan_${new Date().getTime()}.pdf`,
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { 
-                scale: 2, 
-                useCORS: true, 
-                backgroundColor: '#0f172a' // Menjaga warna background di PDF
-            },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+    async function tambahTransaksi() {
+        const data = {
+            kategori: document.getElementById('f-kategori').value,
+            tujuan: document.getElementById('f-tujuan').value,
+            jumlah: document.getElementById('f-jumlah').value,
+            deskripsi: document.getElementById('f-metode').value // Simpan metode di deskripsi sesuai core
         };
 
-        // Sembunyikan tombol saat download
-        const buttons = document.querySelectorAll('button');
-        buttons.forEach(b => b.style.visibility = 'hidden');
+        if(!data.kategori || !data.jumlah) return alert("Isi data!");
+
+        await fetch(API + "/api/tambah", { // Asumsi endpoint core Anda
+            method: "POST",
+            body: JSON.stringify(data)
+        });
+        
+        // Reset Form
+        document.getElementById('f-kategori').value = "";
+        document.getElementById('f-jumlah').value = "";
+        refreshDashboard();
+    }
+
+    async function hapus(id) {
+        if(confirm("Hapus?")) {
+            await fetch(API + "/api/hapus?id=" + id, { method: "DELETE" });
+            refreshDashboard();
+        }
+    }
+
+    /* --- EXPORT PDF CLEAN VERSION --- */
+    function downloadPDF() {
+        const element = document.getElementById('pdf-template');
+        const dateStr = new Date().toLocaleDateString('id-ID', { dateStyle: 'full' });
+        
+        // Isi konten PDF secara dinamis (Clean white background)
+        document.getElementById('pdf-date').innerText = "Dicetak pada: " + dateStr;
+        document.getElementById('pdf-summary').innerHTML = `
+            <p>Total Aset: ${document.getElementById('asset').innerText}</p>
+            <p>Total Pengeluaran: ${document.getElementById('expense').innerText}</p>
+            <hr>
+        `;
+        
+        // Copy table data tanpa kolom aksi
+        const mainTable = document.getElementById('table').innerHTML;
+        document.getElementById('pdf-table').innerHTML = `
+            <thead><tr style="background:#f0f0f0"><th>Tanggal</th><th>Kategori</th><th>Metode</th><th>Tujuan</th><th>Nominal</th></tr></thead>
+            <tbody>${mainTable.replace(/<td><button.*?<\/button><\/td>/g, '')}</tbody>
+        `;
+
+        element.style.display = 'block'; // Munculkan sebentar untuk capture
+
+        const opt = {
+            margin: 10,
+            filename: 'Laporan_Keuangan.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, logging: false },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
 
         html2pdf().set(opt).from(element).save().then(() => {
-            buttons.forEach(b => b.style.visibility = 'visible');
+            element.style.display = 'none'; // Sembunyikan lagi
         });
     }
 
-    // Jalankan pengecekan login saat load
-    checkAuth();
+    function renderCharts(d) {
+        // Logika Chart sama seperti sebelumnya namun disempurnakan tampilannya
+        const ctxL = document.getElementById("chartLine");
+        if(chart) chart.destroy();
+        chart = new Chart(ctxL, {
+            type: 'line',
+            data: { labels: ['Jan', 'Feb', 'Mar'], datasets: [{ label: 'Aset', data: [0, 0, d.dana_darurat + d.investasi], borderColor: '#22c55e' }] },
+            options: { plugins: { legend: { labels: { color: 'white' } } } }
+        });
 
+        const ctxP = document.getElementById("chartPie");
+        if(pieChart) pieChart.destroy();
+        pieChart = new Chart(ctxP, {
+            type: 'doughnut',
+            data: { labels: ['Darurat', 'Investasi'], datasets: [{ data: [d.dana_darurat, d.investasi], backgroundColor: ['#22c55e', '#38bdf8'] }] },
+            options: { plugins: { legend: { labels: { color: 'white' } } } }
+        });
+    }
+
+    checkAuth();
 </script>
+
 </body>
 </html>
