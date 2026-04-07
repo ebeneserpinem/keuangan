@@ -1,74 +1,195 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; max-width: 900px; margin: auto; padding: 20px; }
-        .card { background: #1e293b; padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #334155; text-align: center; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .text-net { color: #38bdf8; font-size: 2.5em; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 10px; border-bottom: 1px solid #334155; text-align: left; font-size: 0.85em; }
-        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
-    </style>
+<meta charset="UTF-8">
+<title>Finance Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body{
+background:#0f172a;
+color:white;
+font-family:sans-serif;
+padding:30px;
+}
+
+.card{
+background:#1e293b;
+padding:20px;
+border-radius:12px;
+margin-bottom:20px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:20px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+td,th{
+padding:10px;
+border-bottom:1px solid #334155;
+}
+
+</style>
 </head>
+
 <body>
-    <div class="card">
-        <h2>💰 Saldo Net (Sisa)</h2>
-        <div class="text-net" id="saldo-net">Rp 0</div>
-    </div>
 
-    <div class="grid">
-        <div class="card">
-            <h3>📊 Alokasi Dana</h3>
-            <canvas id="chartAlokasi"></canvas>
-        </div>
-        <div class="card">
-            <h3>📝 Log Transaksi</h3>
-            <table id="table">
-                <thead><tr><th>Tgl</th><th>Kategori</th><th>Jumlah</th></tr></thead>
-                <tbody></tbody>
-            </table>
-        </div>
-    </div>
+<h2>💰 Finance Dashboard</h2>
 
-    <script>
-        const API = "https://finance-worker.ebeneserpinem6.workers.dev"; // Ganti dengan URL Worker kamu
-        let chart;
+<div class="card">
+<h3>Saldo Net</h3>
+<h1 id="saldoNet">Rp 0</h1>
+</div>
 
-        async function update() {
-            const res = await fetch(API + "/api/data");
-            const d = await res.json();
-            document.getElementById("saldo-net").innerText = "Rp " + d.saldo_net_display.toLocaleString('id-ID');
+<div class="card">
+<h3>Total Aset</h3>
+<h1 id="totalAset">Rp 0</h1>
+</div>
 
-            const ctx = document.getElementById("chartAlokasi").getContext("2d");
-            if (chart) chart.destroy();
-            chart = new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: ['Dana Darurat', 'Investasi', 'Pengeluaran'],
-                    datasets: [{
-                        data: [d.dana_darurat, d.investasi, d.pengeluaran],
-                        backgroundColor: ['#facc15', '#22c55e', '#ef4444']
-                    }]
-                }
-            });
+<div class="grid">
 
-            const resT = await fetch(API + "/api/transaksi");
-            const list = await resT.json();
-            document.querySelector("#table tbody").innerHTML = list.map(t => `
-                <tr>
-                    <td>${t.tanggal}</td>
-                    <td><b>${t.kategori.toUpperCase()}</b></td>
-                    <td>Rp ${t.jumlah.toLocaleString('id-ID')}</td>
-                </tr>
-            `).join("");
-        }
-        update();
-        setInterval(update, 10000);
-    </script>
+<div class="card">
+
+<h3>📊 Alokasi Dana</h3>
+
+<canvas id="pieChart"></canvas>
+
+</div>
+
+<div class="card">
+
+<h3>📄 Log Transaksi</h3>
+
+<table>
+
+<thead>
+<tr>
+<th>Tanggal</th>
+<th>Kategori</th>
+<th>Jumlah</th>
+</tr>
+</thead>
+
+<tbody id="listTransaksi"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<script>
+
+const WORKER_URL="https://finance-worker.ebeneserpinem6.workers.dev";
+
+let chart;
+
+// ====================
+// FORMAT RUPIAH
+// ====================
+
+function rupiah(num){
+return "Rp "+num.toLocaleString("id-ID");
+}
+
+// ====================
+// LOAD DASHBOARD
+// ====================
+
+async function loadDashboard(){
+
+const res=await fetch(WORKER_URL+"/api/data");
+const data=await res.json();
+
+document.getElementById("saldoNet").innerText=rupiah(data.saldo_net);
+document.getElementById("totalAset").innerText=rupiah(data.total_aset);
+
+drawChart(data);
+
+}
+
+// ====================
+// PIE CHART
+// ====================
+
+function drawChart(data){
+
+const ctx=document.getElementById("pieChart");
+
+if(chart) chart.destroy();
+
+chart=new Chart(ctx,{
+
+type:"pie",
+
+data:{
+labels:["Dana Darurat","Investasi"],
+
+datasets:[{
+data:[
+data.dana_darurat,
+data.investasi
+],
+
+backgroundColor:[
+"#facc15",
+"#22c55e"
+]
+
+}]
+
+}
+
+});
+
+}
+
+// ====================
+// LIST TRANSAKSI
+// ====================
+
+async function loadTransaksi(){
+
+const res=await fetch(WORKER_URL+"/api/transaksi");
+const data=await res.json();
+
+const tbody=document.getElementById("listTransaksi");
+
+tbody.innerHTML="";
+
+data.forEach(t=>{
+
+tbody.innerHTML+=`
+
+<tr>
+<td>${t.tanggal}</td>
+<td>${t.kategori.toUpperCase()}</td>
+<td>${rupiah(t.jumlah)}</td>
+</tr>
+
+`;
+
+});
+
+}
+
+// ====================
+// INIT
+// ====================
+
+loadDashboard();
+loadTransaksi();
+
+</script>
+
 </body>
 </html>
