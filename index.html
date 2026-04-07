@@ -8,16 +8,23 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2pdf.js"></script>
 
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
 <style>
 
+/* ===== GLOBAL ===== */
+
+*{box-sizing:border-box}
+
 body{
-font-family:'Segoe UI',sans-serif;
-background:linear-gradient(135deg,#020617,#0f172a);
-color:white;
 margin:0;
+font-family:'Poppins',sans-serif;
+background:linear-gradient(135deg,#020617,#020617,#0f172a,#020617);
+color:white;
 }
 
-/* LOGIN */
+/* ===== LOGIN ===== */
+
 #loginScreen{
 height:100vh;
 display:flex;
@@ -26,84 +33,155 @@ align-items:center;
 }
 
 .loginBox{
-background:#1e293b;
-padding:40px;
-border-radius:15px;
-width:320px;
+background:rgba(30,41,59,.7);
+backdrop-filter:blur(20px);
+padding:45px;
+border-radius:20px;
+width:340px;
 text-align:center;
-box-shadow:0 0 40px rgba(0,0,0,.5);
+box-shadow:0 20px 60px rgba(0,0,0,.6);
+animation:fade .6s ease;
+}
+
+@keyframes fade{
+from{opacity:0;transform:translateY(20px)}
+to{opacity:1}
 }
 
 input{
 width:100%;
-padding:10px;
-margin-top:10px;
-border-radius:8px;
+padding:12px;
+margin-top:12px;
+border-radius:10px;
 border:none;
+background:#020617;
+color:white;
 }
 
 button{
-background:#38bdf8;
+background:linear-gradient(90deg,#38bdf8,#0ea5e9);
 border:none;
-padding:10px 14px;
-border-radius:8px;
+padding:12px;
+border-radius:10px;
 cursor:pointer;
-margin-top:10px;
 color:white;
-font-weight:bold;
+font-weight:600;
+margin-top:12px;
+transition:.25s;
 }
 
-button:hover{opacity:.85}
+button:hover{
+transform:translateY(-2px);
+box-shadow:0 5px 20px rgba(56,189,248,.4);
+}
 
-/* APP */
+/* ===== LAYOUT ===== */
+
 #app{
 display:none;
-max-width:1100px;
-margin:auto;
-padding:20px;
 }
 
-.header{
+.container{
 display:flex;
-justify-content:space-between;
-align-items:center;
+min-height:100vh;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+width:240px;
+background:rgba(2,6,23,.9);
+padding:25px;
+border-right:1px solid #1e293b;
+}
+
+.logo{
+font-size:20px;
+font-weight:600;
+margin-bottom:30px;
+color:#38bdf8;
+}
+
+.menu{
+margin-top:20px;
+}
+
+.menu div{
+padding:12px;
+border-radius:10px;
+cursor:pointer;
+margin-bottom:10px;
+transition:.2s;
+}
+
+.menu div:hover{
+background:#1e293b;
+}
+
+/* CONTENT */
+
+.content{
+flex:1;
+padding:30px;
 }
 
 .card{
-background:rgba(30,41,59,.7);
-backdrop-filter:blur(12px);
+background:rgba(30,41,59,.65);
+backdrop-filter:blur(14px);
 border:1px solid #334155;
-padding:20px;
-border-radius:16px;
-margin-bottom:20px;
-box-shadow:0 10px 25px rgba(0,0,0,.3);
+border-radius:18px;
+padding:22px;
+margin-bottom:22px;
+box-shadow:0 10px 30px rgba(0,0,0,.35);
+animation:fade .4s ease;
 }
 
-.grid4{
+/* STATS */
+
+.grid{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
 gap:20px;
 }
 
+.stat{
+font-size:13px;
+opacity:.7;
+}
+
 .big{
-font-size:2em;
-font-weight:bold;
-margin-top:10px;
+font-size:26px;
+font-weight:600;
+margin-top:6px;
 }
 
 .net{color:#38bdf8}
 .asset{color:#22c55e}
 .expense{color:#ef4444}
 
+/* TABLE */
+
 table{
 width:100%;
 border-collapse:collapse;
-font-size:13px;
 }
 
 th,td{
-padding:10px;
+padding:12px;
 border-bottom:1px solid #334155;
+font-size:13px;
+}
+
+tr:hover{
+background:rgba(255,255,255,.03);
+}
+
+/* FORM */
+
+.formGrid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+gap:12px;
 }
 
 .nominal{
@@ -111,12 +189,21 @@ font-family:monospace;
 font-weight:bold;
 }
 
-.qris{color:#22c55e}
-.transfer{color:#38bdf8}
+/* HEADER */
 
-select{
-padding:6px;
-border-radius:6px;
+.topbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+}
+
+.logout{
+background:#ef4444;
+}
+
+canvas{
+margin-top:15px;
 }
 
 </style>
@@ -128,7 +215,7 @@ border-radius:6px;
 <div id="loginScreen">
 <div class="loginBox">
 <h2>🔐 Finance Login</h2>
-<input type="password" id="password" placeholder="Masukkan Password">
+<input type="password" id="password" placeholder="Password">
 <button onclick="login()">Login</button>
 <p id="error" style="color:#ef4444"></p>
 </div>
@@ -137,56 +224,74 @@ border-radius:6px;
 <!-- APP -->
 <div id="app">
 
-<div class="header">
-<h2>💰 Finance Dashboard</h2>
-<button onclick="logout()">Logout</button>
+<div class="container">
+
+<div class="sidebar">
+<div class="logo">💰 MyFinance</div>
+
+<div class="menu">
+<div>Dashboard</div>
+<div onclick="downloadPDF()">Export PDF</div>
+<div onclick="logout()">Logout</div>
+</div>
+</div>
+
+<div class="content">
+
+<div class="topbar">
+<h2>Finance Overview</h2>
+<span id="update"></span>
 </div>
 
 <!-- NET -->
-<div class="card" style="text-align:center;border-top:4px solid #38bdf8">
-<h2>Net Saldo</h2>
+<div class="card" style="text-align:center">
+<div class="stat">Net Saldo</div>
 <div class="big net" id="net">Rp 0</div>
-<p style="font-size:12px;color:#94a3b8">
-Update: <span id="update">-</span>
-</p>
 </div>
 
-<!-- TOTAL -->
-<div class="grid4">
-<div class="card">Asset<div class="big asset" id="asset">Rp 0</div></div>
-<div class="card">Dana Darurat<div class="big asset" id="darurat">Rp 0</div></div>
-<div class="card">Investasi<div class="big asset" id="investasi">Rp 0</div></div>
-<div class="card">Pengeluaran<div class="big expense" id="expense">Rp 0</div></div>
+<!-- STATS -->
+<div class="grid">
+
+<div class="card">
+<div class="stat">Asset</div>
+<div class="big asset" id="asset">Rp 0</div>
+</div>
+
+<div class="card">
+<div class="stat">Dana Darurat</div>
+<div class="big asset" id="darurat">Rp 0</div>
+</div>
+
+<div class="card">
+<div class="stat">Investasi</div>
+<div class="big asset" id="investasi">Rp 0</div>
+</div>
+
+<div class="card">
+<div class="stat">Pengeluaran</div>
+<div class="big expense" id="expense">Rp 0</div>
+</div>
+
 </div>
 
 <!-- CHART -->
 <div class="card">
 <h3>Grafik Keuangan</h3>
-
-<select id="bulan">
-<option value="all">Semua</option>
-<option value="1">Jan</option>
-<option value="2">Feb</option>
-<option value="3">Mar</option>
-<option value="4">Apr</option>
-</select>
-
-<button onclick="refreshDashboard()">Refresh</button>
-<button onclick="downloadPDF()">Download PDF</button>
-
 <canvas id="chartLine"></canvas>
 </div>
 
-<!-- FORM TAMBAH -->
+<!-- FORM -->
 <div class="card">
 <h3>Tambah Transaksi</h3>
 
+<div class="formGrid">
 <input id="f_kategori" placeholder="Kategori">
 <input id="f_tujuan" placeholder="Tujuan">
 <input id="f_jumlah" type="number" placeholder="Jumlah">
 <input id="f_deskripsi" placeholder="Deskripsi">
+</div>
 
-<button onclick="tambahTransaksi()">Tambah Transaksi</button>
+<button onclick="tambahTransaksi()">Tambah</button>
 </div>
 
 <!-- TABLE -->
@@ -197,7 +302,6 @@ Update: <span id="update">-</span>
 <tr>
 <th>Tanggal</th>
 <th>Kategori</th>
-<th>Metode</th>
 <th>Tujuan</th>
 <th style="text-align:right">Jumlah</th>
 </tr>
@@ -207,6 +311,8 @@ Update: <span id="update">-</span>
 </div>
 
 </div>
+</div>
+</div>
 
 <script>
 
@@ -214,45 +320,38 @@ const API="https://finance-worker.ebeneserpinem6.workers.dev"
 const PASSWORD="123456"
 
 let chart
-let loggedIn=false
 let idleTimer
+let loggedIn=false
 
 /* LOGIN */
 
 function login(){
-const pass=password.value
-
-if(pass===PASSWORD){
+if(password.value===PASSWORD){
 loggedIn=true
-showApp()
-startIdleTimer()
+loginScreen.style.display="none"
+app.style.display="block"
+refreshDashboard()
+startIdle()
 }else{
 error.innerText="Password salah"
 }
 }
 
 function logout(){
-loggedIn=false
 alert("Session berakhir")
 location.reload()
 }
 
-function showApp(){
-loginScreen.style.display="none"
-app.style.display="block"
-refreshDashboard()
-}
-
-/* AUTO LOGOUT 3 MENIT */
+/* AUTO LOGOUT */
 
 function resetIdle(){
 clearTimeout(idleTimer)
 idleTimer=setTimeout(logout,180000)
 }
 
-function startIdleTimer(){
+function startIdle(){
 ["mousemove","click","keydown","scroll"]
-.forEach(evt=>document.addEventListener(evt,resetIdle))
+.forEach(e=>document.addEventListener(e,resetIdle))
 resetIdle()
 }
 
@@ -260,37 +359,27 @@ resetIdle()
 
 async function refreshDashboard(){
 
-if(!loggedIn) return
-
-const res=await fetch(API+"/api/data")
-const d=await res.json()
-
-const assetTotal=d.dana_darurat+d.investasi
+const d=await (await fetch(API+"/api/data")).json()
 
 net.innerText="Rp "+d.saldo_net_display.toLocaleString('id-ID')
-asset.innerText="Rp "+assetTotal.toLocaleString('id-ID')
+asset.innerText="Rp "+(d.dana_darurat+d.investasi).toLocaleString('id-ID')
 darurat.innerText="Rp "+d.dana_darurat.toLocaleString('id-ID')
 investasi.innerText="Rp "+d.investasi.toLocaleString('id-ID')
 expense.innerText="Rp "+d.pengeluaran.toLocaleString('id-ID')
 
-update.innerText=new Date().toLocaleTimeString()
+update.innerText="Update "+new Date().toLocaleTimeString()
 
-/* CHART */
-const bulan=document.getElementById("bulan").value
-const chartRes=await fetch(API+"/api/chart?bulan="+bulan)
-const data=await chartRes.json()
-
-const ctx=document.getElementById("chartLine")
+const chartData=await (await fetch(API+"/api/chart")).json()
 
 if(chart) chart.destroy()
 
-chart=new Chart(ctx,{
+chart=new Chart(chartLine,{
 type:'line',
 data:{
-labels:data.bulan,
+labels:chartData.bulan,
 datasets:[
-{label:'Asset',data:data.asset,borderColor:'#22c55e',tension:.3},
-{label:'Pengeluaran',data:data.pengeluaran,borderColor:'#ef4444',tension:.3}
+{label:'Asset',data:chartData.asset,borderColor:'#22c55e',tension:.3},
+{label:'Pengeluaran',data:chartData.pengeluaran,borderColor:'#ef4444',tension:.3}
 ]
 }
 })
@@ -298,52 +387,39 @@ datasets:[
 loadTransaksi()
 }
 
-/* LOAD TABLE */
+/* TABLE */
 
 async function loadTransaksi(){
-
-const res=await fetch(API+"/api/transaksi")
-const list=await res.json()
+const list=await (await fetch(API+"/api/transaksi")).json()
 
 table.innerHTML=list.map(t=>{
-
-let metode="Transfer"
-if(t.deskripsi?.toLowerCase().includes("qris")) metode="QRIS"
-
 const date=new Date(t.tanggal)
-
 return `
 <tr>
 <td>${date.toLocaleDateString('id-ID')}</td>
 <td>${t.kategori}</td>
-<td class="${metode=="QRIS"?"qris":"transfer"}">${metode}</td>
 <td>${t.tujuan ?? "-"}</td>
 <td class="nominal" style="text-align:right">
 Rp ${t.jumlah.toLocaleString('id-ID')}
 </td>
-</tr>
-`
+</tr>`
 }).join("")
 }
 
-/* TAMBAH TRANSAKSI */
+/* TAMBAH */
 
 async function tambahTransaksi(){
-
-const data={
-kategori:f_kategori.value,
-tujuan:f_tujuan.value,
-jumlah:Number(f_jumlah.value),
-deskripsi:f_deskripsi.value
-}
 
 await fetch(API+"/api/transaksi",{
 method:"POST",
 headers:{'Content-Type':'application/json'},
-body:JSON.stringify(data)
+body:JSON.stringify({
+kategori:f_kategori.value,
+tujuan:f_tujuan.value,
+jumlah:Number(f_jumlah.value),
+deskripsi:f_deskripsi.value
 })
-
-alert("Transaksi berhasil ditambahkan")
+})
 
 refreshDashboard()
 }
