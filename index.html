@@ -13,59 +13,36 @@
             --glow: rgba(56, 189, 248, 0.15);
         }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; line-height: 1.6; }
-        
-        /* Glassmorphism Effect */
         .container { max-width: 1200px; margin: auto; }
         .card { 
             background: var(--card); padding: 20px; border-radius: 16px; 
             border: 1px solid var(--border); margin-bottom: 20px;
-            backdrop-filter: blur(12px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(12px); transition: all 0.3s;
         }
-        .card:hover { border-color: var(--primary); box-shadow: 0 8px 30px var(--glow); transform: translateY(-3px); }
-
+        .card:hover { border-color: var(--primary); box-shadow: 0 8px 30px var(--glow); }
         .grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
         .grid-charts { display: grid; grid-template-columns: 1.2fr 1.8fr; gap: 20px; margin-bottom: 20px; }
         @media (max-width: 850px) { .grid-charts { grid-template-columns: 1fr; } }
-        
         input, select { 
             width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; 
-            border: 1px solid var(--border); background: #0f172a; color: white; 
-            transition: 0.3s;
+            border: 1px solid var(--border); background: #0f172a; color: white; box-sizing: border-box;
         }
-        input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px var(--glow); }
-
-        .big-val { font-size: 2em; font-weight: 800; margin-top: 5px; letter-spacing: -1px; }
-        .c-asset { color: var(--success); text-shadow: 0 0 10px rgba(34, 197, 94, 0.2); }
-        .c-expense { color: var(--danger); text-shadow: 0 0 10px rgba(239, 68, 68, 0.2); }
-        .c-net { color: var(--primary); text-shadow: 0 0 10px rgba(56, 189, 248, 0.2); }
-        
-        .status-badge { font-size: 12px; padding: 4px 12px; border-radius: 20px; font-weight: bold; margin-top: 10px; display: inline-block; }
-
+        .big-val { font-size: 2em; font-weight: 800; margin-top: 5px; }
+        .c-asset { color: var(--success); }
+        .c-expense { color: var(--danger); }
+        .c-net { color: var(--primary); }
         table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        th, td { padding: 16px; border-bottom: 1px solid var(--border); text-align: left; }
-        th { color: #94a3b8; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; }
-        tr { transition: 0.2s; }
-        tr:hover { background: rgba(255,255,255,0.03); }
-        .nominal { text-align: right; font-family: 'JetBrains Mono', monospace; font-weight: bold; }
-        
+        th, td { padding: 12px; border-bottom: 1px solid var(--border); text-align: left; }
+        .nominal { text-align: right; font-family: monospace; font-weight: bold; }
         button { 
             background: var(--primary); border: none; padding: 12px 24px; 
-            border-radius: 10px; cursor: pointer; color: white; 
-            font-weight: bold; transition: 0.3s;
+            border-radius: 10px; cursor: pointer; color: white; font-weight: bold;
         }
-        button:hover { filter: brightness(1.1); transform: scale(1.02); }
-        .btn-del { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid var(--danger); padding: 5px 12px; }
-        .btn-del:hover { background: var(--danger); color: white; }
-
-        /* Chart Wrapper for text centering */
-        .chart-container { position: relative; width: 100%; max-height: 250px; }
-        .chart-text {
-            position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%);
-            text-align: center; pointer-events: none;
-        }
-
+        button:disabled { background: #475569; cursor: not-allowed; }
+        .btn-del { background: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 4px 8px; }
         #login-screen { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 10000; }
-        #pdf-template { display: none; background: white; color: black; padding: 40px; }
+        .chart-container { position: relative; width: 100%; max-height: 250px; }
+        .chart-text { position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
     </style>
 </head>
 <body>
@@ -73,40 +50,26 @@
 <div id="login-screen">
     <div class="card" style="width: 320px; text-align: center;">
         <h2 style="color: var(--primary)">Vault Access</h2>
-        <p style="color: #94a3b8; font-size: 13px;">Enter Master Key to decrypt data</p>
-        <input type="password" id="passInput" placeholder="••••••••" style="text-align: center; font-size: 18px;">
-        <button onclick="login()" style="width: 100%; margin-top: 15px; letter-spacing: 1px;">UNLOCK</button>
+        <input type="password" id="passInput" placeholder="••••••••" style="text-align: center;">
+        <button onclick="login()" style="width: 100%; margin-top: 15px;">UNLOCK</button>
     </div>
 </div>
 
 <div id="main-content" class="container" style="display: none;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 25px;">
-        <h2 style="margin:0; font-weight: 800;">Finance<span style="color:var(--primary)">Asset</span></h2>
-        <div style="display: flex; gap: 10px;">
-            <button onclick="downloadPDF()" style="background:#334155">Export PDF</button>
-            <button onclick="logout()" style="background:rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger);">Logout</button>
-        </div>
+        <h2 style="margin:0;">Finance<span style="color:var(--primary)">Asset</span></h2>
+        <button onclick="logout()" style="background:rgba(239, 68, 68, 0.2); color: var(--danger);">Logout</button>
     </div>
 
     <div class="grid3">
-        <div class="card">
-            <small style="color: #94a3b8">Total Aset (A+B)</small>
-            <div id="v-asset" class="big-val c-asset">Rp 0</div>
-        </div>
-        <div class="card">
-            <small style="color: #94a3b8">Total Pengeluaran</small>
-            <div id="v-exp" class="big-val c-expense">Rp 0</div>
-        </div>
-        <div class="card">
-            <small style="color: #94a3b8">Net Balance</small>
-            <div id="v-net" class="big-val c-net">Rp 0</div>
-            <div id="v-status" class="status-badge">Checking status...</div>
-        </div>
+        <div class="card"><small>Total Aset</small><div id="v-asset" class="big-val c-asset">Rp 0</div></div>
+        <div class="card"><small>Pengeluaran</small><div id="v-exp" class="big-val c-expense">Rp 0</div></div>
+        <div class="card"><small>Net Balance</small><div id="v-net" class="big-val c-net">Rp 0</div></div>
     </div>
 
     <div class="card">
         <div class="grid3" style="align-items: end;">
-            <div><label style="font-size: 12px; color: #94a3b8">Kategori</label>
+            <div><label>Kategori</label>
                 <select id="f-kat">
                     <option value="pemasukan">📥 Pemasukan (Cash In)</option>
                     <option value="pengeluaran">📤 Pengeluaran</option>
@@ -114,80 +77,53 @@
                     <option value="dana_darurat">🛡️ Dana Darurat</option>
                 </select>
             </div>
-            <div><label style="font-size: 12px; color: #94a3b8">Deskripsi</label><input type="text" id="f-desc" placeholder="Bayar Kost / Gaji"></div>
-            <div><label style="font-size: 12px; color: #94a3b8">Nominal</label><input type="number" id="f-amt" placeholder="0"></div>
-            <button onclick="simpan()" style="background:var(--success); width: 100%;">SIMPAN DATA</button>
+            <div><label>Deskripsi</label><input type="text" id="f-desc" placeholder="Gaji / Makan"></div>
+            <div><label>Nominal</label><input type="number" id="f-amt" placeholder="0"></div>
+            <button id="btnSimpan" onclick="simpan()" style="background:var(--success); width: 100%;">SIMPAN DATA</button>
         </div>
     </div>
 
     <div class="grid-charts">
-        <div class="card" style="text-align: center;">
-            <h3 style="margin-top:0; font-size: 14px;">🛡️ Progress Dana Darurat</h3>
+        <div class="card">
+            <h3 style="font-size: 14px; text-align: center;">Progress Dana Darurat</h3>
             <div class="chart-container">
                 <canvas id="chartPie"></canvas>
                 <div class="chart-text">
                     <div id="chart-percent" style="font-size: 24px; font-weight: 800; color: var(--primary);">0%</div>
-                    <div style="font-size: 10px; color: #94a3b8;">Target</div>
                 </div>
             </div>
         </div>
         <div class="card">
-            <h3 style="margin-top:0; font-size: 14px;">📈 Growth Analytics</h3>
-            <canvas id="chartLine" style="max-height: 250px;"></canvas>
+            <h3 style="font-size: 14px;">Growth Analytics</h3>
+            <canvas id="chartLine" style="max-height: 200px;"></canvas>
         </div>
     </div>
 
-    <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 20px;">
-            <h3 style="margin:0">Transaction Log</h3>
-            <div style="display: flex; gap: 10px; align-items: center;">
-                <select id="filterBulan" style="width: auto; margin:0; padding: 5px 15px;" onchange="loadTable()">
-                    <option value="all">Semua Waktu</option>
-                    <option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option>
-                    <option value="3">April</option><option value="4">Mei</option><option value="5">Juni</option>
-                    <option value="6">Juli</option><option value="7">Agustus</option><option value="8">September</option>
-                    <option value="9">Oktober</option><option value="10">November</option><option value="11">Desember</option>
-                </select>
-            </div>
-        </div>
-        <div style="overflow-x: auto;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Type</th>
-                        <th>Description</th>
-                        <th class="nominal">Amount</th>
-                        <th style="text-align:center">Action</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
-        </div>
+    <div class="card" style="overflow-x: auto;">
+        <h3>Transaction Log</h3>
+        <table>
+            <thead>
+                <tr><th>Date</th><th>Kategori</th><th>Deskripsi</th><th class="nominal">Amount</th><th>Action</th></tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
     </div>
-</div>
-
-<div id="pdf-template">
-    <h1 style="text-align:center; border-bottom: 2px solid #000;">MONTHLY FINANCIAL REPORT</h1>
-    <div id="pdf-header" style="margin: 20px 0;"></div>
-    <table style="width: 100%; border: 1px solid #000; border-collapse: collapse;">
-        <thead><tr style="background:#eee"><th>Tanggal</th><th>Deskripsi</th><th>Kategori</th><th style="text-align:right">Nominal</th></tr></thead>
-        <tbody id="pdf-table-body"></tbody>
-    </table>
 </div>
 
 <script>
+    // GANTI URL INI DENGAN URL WORKER ANDA
     const API = "https://finance-worker.ebeneserpinem6.workers.dev";
-    const TARGET_DANA_DARURAT = 10000000; // Target kamu (10 Juta)
-    let myPieChart, myLineChart, logoutTimer;
+    const TARGET_DANA_DARURAT = 10000000; 
+    let myPieChart, myLineChart;
 
     function login() {
         if(document.getElementById('passInput').value === "12345") {
             localStorage.setItem("session", "valid");
             checkAuth();
-        } else { alert("Access Denied: Incorrect Master Key"); }
+        } else { alert("Wrong Password!"); }
     }
     function logout() { localStorage.removeItem("session"); location.reload(); }
+    
     function checkAuth() {
         if(localStorage.getItem("session")) {
             document.getElementById('login-screen').style.display = 'none';
@@ -197,48 +133,32 @@
     }
 
     async function refresh() {
-        const res = await fetch(API + "/api/data");
-        const d = await res.json();
-        
-        document.getElementById("v-asset").innerText = "Rp " + d.totalAsset.toLocaleString('id-ID');
-        document.getElementById("v-exp").innerText = "Rp " + d.pengeluaran.toLocaleString('id-ID');
-        document.getElementById("v-net").innerText = "Rp " + d.saldoBersih.toLocaleString('id-ID');
+        try {
+            const res = await fetch(API + "/api/data");
+            const d = await res.json();
+            
+            document.getElementById("v-asset").innerText = "Rp " + d.totalAsset.toLocaleString('id-ID');
+            document.getElementById("v-exp").innerText = "Rp " + d.pengeluaran.toLocaleString('id-ID');
+            document.getElementById("v-net").innerText = "Rp " + d.saldoBersih.toLocaleString('id-ID');
 
-        // Update Health Status
-        const statusEl = document.getElementById("v-status");
-        if(d.saldoBersih > 0) {
-            statusEl.innerText = "Kondisi Aman! 🚀";
-            statusEl.style.background = "rgba(34, 197, 94, 0.1)";
-            statusEl.style.color = "var(--success)";
-        } else {
-            statusEl.innerText = "Defisit Keuangan! 🚨";
-            statusEl.style.background = "rgba(239, 68, 68, 0.1)";
-            statusEl.style.color = "var(--danger)";
-        }
-
-        updatePieChart(d.investasi, d.dana_darurat);
-        loadTable();
+            updatePieChart(d.dana_darurat);
+            await loadTable();
+        } catch (e) { console.error("Refresh Error:", e); }
     }
 
     async function loadTable() {
         const res = await fetch(API + "/api/transaksi");
-        let list = await res.json();
-        const filterVal = document.getElementById('filterBulan').value;
-        list.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
-
-        if(filterVal !== "all") {
-            list = list.filter(t => new Date(t.tanggal).getMonth() == filterVal);
-        }
-
+        const list = await res.json();
+        
         document.getElementById("tableBody").innerHTML = list.map(t => `
             <tr>
-                <td style="color: #94a3b8; font-size: 12px">${new Date(t.tanggal).toLocaleDateString('id-ID')}</td>
-                <td><span style="font-size:10px; font-weight:bold; color:var(--primary)">${t.kategori.toUpperCase()}</span></td>
-                <td><b style="color:#f1f5f9">${t.deskripsi}</b></td>
+                <td>${new Date(t.tanggal).toLocaleDateString('id-ID')}</td>
+                <td><small>${t.kategori.toUpperCase()}</small></td>
+                <td><b>${t.deskripsi}</b></td>
                 <td class="nominal" style="color:${t.kategori === 'pengeluaran' ? 'var(--danger)' : 'var(--success)'}">
-                    ${t.kategori === 'pengeluaran' ? '-' : '+'} Rp ${Number(t.jumlah).toLocaleString('id-ID')}
+                    Rp ${Number(t.jumlah).toLocaleString('id-ID')}
                 </td>
-                <td style="text-align:center"><button class="btn-del" onclick="hapus('${t.id}')">Hapus</button></td>
+                <td><button class="btn-del" onclick="hapus('${t.id}')">Hapus</button></td>
             </tr>
         `).join("");
 
@@ -248,41 +168,57 @@
     async function simpan() {
         const desc = document.getElementById('f-desc').value;
         const amt = document.getElementById('f-amt').value;
-        if(!desc || !amt) return;
-        const payload = {
-            deskripsi: desc, jumlah: parseFloat(amt),
-            kategori: document.getElementById('f-kat').value, email_id: "user@mail.com"
-        };
-        await fetch(API + "/api/tambah", { method: "POST", body: JSON.stringify(payload) });
-        document.getElementById('f-desc').value = ""; document.getElementById('f-amt').value = "";
-        refresh();
+        const kat = document.getElementById('f-kat').value;
+        const btn = document.getElementById('btnSimpan');
+
+        if(!desc || !amt) return alert("Lengkapi data!");
+
+        btn.disabled = true;
+        btn.innerText = "Saving...";
+
+        try {
+            const response = await fetch(API + "/api/tambah", { 
+                method: "POST", 
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ deskripsi: desc, jumlah: parseFloat(amt), kategori: kat }) 
+            });
+
+            if(response.ok) {
+                document.getElementById('f-desc').value = ""; 
+                document.getElementById('f-amt').value = "";
+                await refresh();
+            }
+        } catch (e) { 
+            alert("Gagal simpan data");
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "SIMPAN DATA";
+        }
     }
 
     async function hapus(id) {
-        if(confirm("Permanently delete this entry?")) {
+        if(confirm("Hapus data ini?")) {
             await fetch(`${API}/api/hapus?id=${id}`, { method: "DELETE" });
             refresh();
         }
     }
 
-    function updatePieChart(inv, darurat) {
+    function updatePieChart(darurat) {
         const ctx = document.getElementById('chartPie');
         if(myPieChart) myPieChart.destroy();
         
-        const sisa = TARGET_DANA_DARURAT - darurat;
-        const sisaVal = sisa > 0 ? sisa : 0; 
-        const persentase = Math.round((darurat / TARGET_DANA_DARURAT) * 100);
+        const sisa = Math.max(0, TARGET_DANA_DARURAT - darurat);
+        const persentase = Math.min(100, Math.round((darurat / TARGET_DANA_DARURAT) * 100));
         document.getElementById('chart-percent').innerText = persentase + "%";
 
         myPieChart = new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: ['Terkumpul', 'Kekurangan'],
+                labels: ['Terkumpul', 'Sisa'],
                 datasets: [{
-                    data: [darurat, sisaVal],
+                    data: [darurat, sisa],
                     backgroundColor: ['#38bdf8', '#1e293b'],
-                    borderWidth: 0,
-                    hoverOffset: 4
+                    borderWidth: 0
                 }]
             },
             options: { cutout: '80%', plugins: { legend: { display: false } } }
@@ -292,41 +228,29 @@
     function updateLineChart(data) {
         const ctx = document.getElementById('chartLine');
         if(myLineChart) myLineChart.destroy();
-        const sortedData = [...data].sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
-        const labels = sortedData.map(t => new Date(t.tanggal).toLocaleDateString('id-ID', {day:'2-digit', month:'short'}));
-        let runningTotal = 0;
-        const dataPoints = sortedData.map(t => {
-            if(t.kategori === 'pengeluaran') runningTotal -= t.jumlah; else runningTotal += t.jumlah;
-            return runningTotal;
+        
+        const sorted = [...data].reverse();
+        let current = 0;
+        const dataPoints = sorted.map(t => {
+            current += (t.kategori === 'pengeluaran' ? -t.jumlah : t.jumlah);
+            return current;
         });
 
         myLineChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: labels,
+                labels: sorted.map(t => new Date(t.tanggal).toLocaleDateString('id-ID')),
                 datasets: [{
-                    data: dataPoints, borderColor: '#38bdf8', 
-                    backgroundColor: 'rgba(56, 189, 248, 0.1)', fill: true, tension: 0.4
+                    label: 'Saldo',
+                    data: dataPoints,
+                    borderColor: '#38bdf8',
+                    backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                    fill: true,
+                    tension: 0.3
                 }]
             },
-            options: {
-                scales: {
-                    y: { ticks: { color: '#64748b' }, grid: { color: '#1e293b' } },
-                    x: { ticks: { color: '#64748b' }, grid: { display: false } }
-                },
-                plugins: { legend: { display: false } }
-            }
+            options: { plugins: { legend: { display: false } } }
         });
-    }
-
-    function downloadPDF() {
-        const area = document.getElementById('pdf-template');
-        document.getElementById('pdf-header').innerHTML = `
-            <p>Total Assets: <b>${document.getElementById('v-asset').innerText}</b></p>
-            <p>Net Balance: <b>${document.getElementById('v-net').innerText}</b></p>
-        `;
-        area.style.display = 'block';
-        html2pdf().from(area).set({ margin: 10, filename: 'Financial_Vault_Report.pdf' }).save().then(() => area.style.display = 'none');
     }
 
     checkAuth();
