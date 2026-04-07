@@ -2,75 +2,83 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Dashboard Keuangan</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Finance Dashboard</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2pdf.js"></script>
 
 <style>
 
 body{
-font-family:Arial;
+font-family:'Segoe UI',sans-serif;
 background:#0f172a;
 color:white;
-margin:0;
-padding:20px;
-}
-
-.container{
 max-width:1100px;
 margin:auto;
+padding:20px;
 }
 
 .card{
 background:#1e293b;
 padding:20px;
-border-radius:12px;
+border-radius:14px;
 margin-bottom:20px;
-box-shadow:0 0 15px rgba(0,0,0,.3);
+border:1px solid #334155;
 }
 
-.grid{
+.grid4{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:15px;
+}
+
+.gridChart{
 display:grid;
 grid-template-columns:2fr 1fr;
 gap:20px;
 }
 
-input,select,button{
-padding:8px;
-margin:5px;
-border-radius:6px;
-border:none;
+.big{
+font-size:1.8em;
+font-weight:bold;
+margin-top:8px;
 }
 
-button{
-background:#22c55e;
-color:white;
-cursor:pointer;
-}
+.asset{color:#22c55e}
+.expense{color:#ef4444}
+.net{color:#38bdf8}
 
-button:hover{
-opacity:.85;
+canvas{
+max-height:240px;
 }
 
 table{
 width:100%;
 border-collapse:collapse;
-margin-top:10px;
+font-size:13px;
 }
 
-td,th{
-padding:8px;
+th,td{
+padding:10px;
 border-bottom:1px solid #334155;
-text-align:left;
 }
 
-canvas{
-max-height:260px;
+button{
+background:#38bdf8;
+border:none;
+padding:7px 12px;
+border-radius:6px;
+cursor:pointer;
+color:white;
 }
 
-.deleteBtn{
-background:#ef4444;
+input,select{
+padding:6px;
+border-radius:6px;
+border:none;
+margin:5px;
 }
 
 </style>
@@ -78,27 +86,74 @@ background:#ef4444;
 
 <body>
 
-<div class="container">
+<!-- NET -->
+<div class="card" style="text-align:center">
+<h2>Net Saldo</h2>
+<div id="net" class="big net">Rp 0</div>
+</div>
 
-<h2>💰 Dashboard Keuangan</h2>
+<!-- TOTAL -->
+<div class="grid4">
 
 <div class="card">
+Dana Darurat
+<div id="darurat" class="big asset">Rp 0</div>
+</div>
+
+<div class="card">
+Investasi
+<div id="investasi" class="big asset">Rp 0</div>
+</div>
+
+<div class="card">
+Pengeluaran
+<div id="expense" class="big expense">Rp 0</div>
+</div>
+
+<div class="card">
+Total Asset
+<div id="asset" class="big asset">Rp 0</div>
+</div>
+
+</div>
+
+<!-- FORM -->
+<div class="card">
+
+<h3>Tambah Transaksi</h3>
 
 <input id="nama" placeholder="Nama transaksi">
+
 <input id="jumlah" type="number" placeholder="Jumlah">
+
 <select id="jenis">
-<option value="pemasukan">Pemasukan</option>
+<option value="darurat">Dana Darurat</option>
+<option value="investasi">Investasi</option>
 <option value="pengeluaran">Pengeluaran</option>
 </select>
 
-<select id="bulan"></select>
+<select id="bulan">
+<option>Januari</option>
+<option>Februari</option>
+<option>Maret</option>
+<option>April</option>
+<option>Mei</option>
+<option>Juni</option>
+<option>Juli</option>
+<option>Agustus</option>
+<option>September</option>
+<option>Oktober</option>
+<option>November</option>
+<option>Desember</option>
+</select>
 
 <button onclick="tambah()">Tambah</button>
 <button onclick="downloadPDF()">Download PDF</button>
 
 </div>
 
-<div class="grid">
+<!-- CHART -->
+<div class="gridChart">
 
 <div class="card">
 <h3>Grafik Keuangan</h3>
@@ -112,7 +167,9 @@ background:#ef4444;
 
 </div>
 
+<!-- TABLE -->
 <div class="card">
+
 <h3>Daftar Transaksi</h3>
 
 <table>
@@ -126,69 +183,35 @@ background:#ef4444;
 </tr>
 </thead>
 
-<tbody id="tabel"></tbody>
+<tbody id="table"></tbody>
 
 </table>
 
 </div>
 
-</div>
-
 <script>
 
-/////////////////////////
-// AUTO LOGOUT 3 MENIT
-/////////////////////////
+let data = JSON.parse(localStorage.getItem("finance")) || []
 
-let timer
-function resetTimer(){
-clearTimeout(timer)
-timer=setTimeout(()=>{
-alert("Session habis (3 menit tidak aktif)")
-location.reload()
-},180000)
+let chart
+let pieChart
+
+function rupiah(n){
+return "Rp "+n.toLocaleString('id-ID')
 }
 
-document.onclick=resetTimer
-document.onmousemove=resetTimer
-resetTimer()
-
-/////////////////////////
-// DATA STORAGE (NO COOKIE)
-/////////////////////////
-
-let data = JSON.parse(localStorage.getItem("trx")||"[]")
-
-/////////////////////////
-// BULAN SELECT
-/////////////////////////
-
-const bulanList=[
-"Januari","Februari","Maret","April","Mei","Juni",
-"Juli","Agustus","September","Oktober","November","Desember"
-]
-
-const bulanSelect=document.getElementById("bulan")
-
-bulanList.forEach((b,i)=>{
-let opt=document.createElement("option")
-opt.value=i
-opt.text=b
-bulanSelect.appendChild(opt)
-})
-
-/////////////////////////
-// TAMBAH TRANSAKSI
-/////////////////////////
+function simpan(){
+localStorage.setItem("finance",JSON.stringify(data))
+}
 
 function tambah(){
 
 const nama=document.getElementById("nama").value
-const jumlah=Number(document.getElementById("jumlah").value)
+const jumlah=parseInt(document.getElementById("jumlah").value)
 const jenis=document.getElementById("jenis").value
 const bulan=document.getElementById("bulan").value
 
-if(!nama||!jumlah)return alert("Isi data")
+if(!nama||!jumlah) return alert("Isi data")
 
 data.push({nama,jumlah,jenis,bulan})
 
@@ -196,118 +219,108 @@ simpan()
 render()
 }
 
-/////////////////////////
-// HAPUS TRANSAKSI
-/////////////////////////
-
-function hapus(index){
+function hapus(i){
 if(confirm("Hapus transaksi?")){
-data.splice(index,1)
+data.splice(i,1)
 simpan()
 render()
 }
 }
 
-function simpan(){
-localStorage.setItem("trx",JSON.stringify(data))
-}
-
-/////////////////////////
-// RENDER TABEL
-/////////////////////////
-
 function render(){
 
-const tbody=document.getElementById("tabel")
-tbody.innerHTML=""
-
-data.forEach((d,i)=>{
-tbody.innerHTML+=`
-<tr>
-<td>${d.nama}</td>
-<td>${d.jumlah}</td>
-<td>${d.jenis}</td>
-<td>${bulanList[d.bulan]}</td>
-<td><button class="deleteBtn" onclick="hapus(${i})">Hapus</button></td>
-</tr>`
-})
-
-updateChart()
-}
-
-/////////////////////////
-// CHART
-/////////////////////////
-
-let chart
-let pieChart
-
-function updateChart(){
-
-let pemasukan=0
+let darurat=0
+let investasi=0
 let pengeluaran=0
 
 data.forEach(d=>{
-if(d.jenis==="pemasukan") pemasukan+=d.jumlah
-else pengeluaran+=d.jumlah
+if(d.jenis=="darurat") darurat+=d.jumlah
+if(d.jenis=="investasi") investasi+=d.jumlah
+if(d.jenis=="pengeluaran") pengeluaran+=d.jumlah
 })
 
-const danaDarurat=pemasukan*0.2
-const investasi=pemasukan*0.3
+const asset=darurat+investasi
+const net=asset-pengeluaran
+
+document.getElementById("darurat").innerText=rupiah(darurat)
+document.getElementById("investasi").innerText=rupiah(investasi)
+document.getElementById("expense").innerText=rupiah(pengeluaran)
+document.getElementById("asset").innerText=rupiah(asset)
+document.getElementById("net").innerText=rupiah(net)
+
+renderTable()
+renderChart(darurat,investasi,pengeluaran)
+}
+
+function renderTable(){
+
+const tbody=document.getElementById("table")
+
+tbody.innerHTML=data.map((d,i)=>`
+<tr>
+<td>${d.nama}</td>
+<td>${rupiah(d.jumlah)}</td>
+<td>${d.jenis}</td>
+<td>${d.bulan}</td>
+<td><button onclick="hapus(${i})">Hapus</button></td>
+</tr>
+`).join("")
+}
+
+function renderChart(darurat,investasi,pengeluaran){
+
+const ctx=document.getElementById("chartLine")
 
 if(chart) chart.destroy()
 
-chart=new Chart(
-document.getElementById("chartLine"),
-{
-type:'bar',
+chart=new Chart(ctx,{
+type:'line',
 data:{
-labels:["Pemasukan","Pengeluaran"],
+labels:["Dana Darurat","Investasi","Pengeluaran"],
 datasets:[{
 label:"Total",
-data:[pemasukan,pengeluaran]
+data:[darurat,investasi,pengeluaran],
+borderColor:"#38bdf8",
+tension:0.3
 }]
+},
+options:{
+plugins:{legend:{labels:{color:"white"}}},
+scales:{
+x:{ticks:{color:"white"}},
+y:{ticks:{color:"white"}}
+}
 }
 })
 
+const pie=document.getElementById("chartPie")
+
 if(pieChart) pieChart.destroy()
 
-pieChart=new Chart(
-document.getElementById("chartPie"),
-{
+pieChart=new Chart(pie,{
 type:'pie',
 data:{
 labels:["Dana Darurat","Investasi"],
 datasets:[{
-data:[danaDarurat,investasi]
+data:[darurat,investasi],
+backgroundColor:["#22c55e","#38bdf8"]
 }]
+},
+options:{
+plugins:{legend:{labels:{color:"white"}}}
 }
 })
-
 }
 
-/////////////////////////
-// DOWNLOAD PDF (FIX BUG)
-/////////////////////////
+function downloadPDF(){
 
-async function downloadPDF(){
+html2pdf().from(document.body).set({
+margin:10,
+filename:"laporan_keuangan.pdf",
+html2canvas:{scale:2},
+jsPDF:{unit:"mm",format:"a4"}
+}).save()
 
-const { jsPDF } = window.jspdf
-const doc=new jsPDF()
-
-doc.text("Laporan Keuangan",20,20)
-
-let y=30
-
-data.forEach(d=>{
-doc.text(
-`${d.nama} | ${d.jumlah} | ${d.jenis} | ${bulanList[d.bulan]}`,
-20,y
-)
-y+=10
-})
-
-doc.save("laporan_keuangan.pdf")
 }
 
 render()
