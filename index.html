@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Finance Dashboard</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -14,24 +12,76 @@
 
 body{
 font-family:'Segoe UI',sans-serif;
-background:#0f172a;
+background:linear-gradient(135deg,#020617,#0f172a);
 color:white;
+margin:0;
+}
+
+/* LOGIN */
+#loginScreen{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+.loginBox{
+background:#1e293b;
+padding:40px;
+border-radius:15px;
+width:320px;
+text-align:center;
+box-shadow:0 0 40px rgba(0,0,0,.5);
+}
+
+input{
+width:100%;
+padding:10px;
+margin-top:10px;
+border-radius:8px;
+border:none;
+}
+
+button{
+background:#38bdf8;
+border:none;
+padding:10px 14px;
+border-radius:8px;
+cursor:pointer;
+margin-top:10px;
+color:white;
+font-weight:bold;
+}
+
+button:hover{opacity:.85}
+
+/* APP */
+#app{
+display:none;
 max-width:1100px;
 margin:auto;
 padding:20px;
 }
 
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
 .card{
-background:#1e293b;
-padding:20px;
-border-radius:15px;
+background:rgba(30,41,59,.7);
+backdrop-filter:blur(12px);
 border:1px solid #334155;
+padding:20px;
+border-radius:16px;
 margin-bottom:20px;
+box-shadow:0 10px 25px rgba(0,0,0,.3);
 }
 
 .grid4{
 display:grid;
-grid-template-columns:repeat(4,1fr);
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
 gap:20px;
 }
 
@@ -54,7 +104,6 @@ font-size:13px;
 th,td{
 padding:10px;
 border-bottom:1px solid #334155;
-text-align:left;
 }
 
 .nominal{
@@ -65,166 +114,169 @@ font-weight:bold;
 .qris{color:#22c55e}
 .transfer{color:#38bdf8}
 
-button{
-background:#38bdf8;
-border:none;
-padding:8px 12px;
-border-radius:6px;
-cursor:pointer;
-margin-left:5px;
-}
-
 select{
 padding:6px;
 border-radius:6px;
 }
 
 </style>
-
 </head>
 
 <body>
 
-<!-- NET SALDO -->
+<!-- LOGIN -->
+<div id="loginScreen">
+<div class="loginBox">
+<h2>🔐 Finance Login</h2>
+<input type="password" id="password" placeholder="Masukkan Password">
+<button onclick="login()">Login</button>
+<p id="error" style="color:#ef4444"></p>
+</div>
+</div>
 
+<!-- APP -->
+<div id="app">
+
+<div class="header">
+<h2>💰 Finance Dashboard</h2>
+<button onclick="logout()">Logout</button>
+</div>
+
+<!-- NET -->
 <div class="card" style="text-align:center;border-top:4px solid #38bdf8">
-
 <h2>Net Saldo</h2>
-
 <div class="big net" id="net">Rp 0</div>
-
 <p style="font-size:12px;color:#94a3b8">
 Update: <span id="update">-</span>
 </p>
-
 </div>
 
 <!-- TOTAL -->
-
 <div class="grid4">
-
-<div class="card">
-Asset
-<div class="big asset" id="asset">Rp 0</div>
-</div>
-
-<div class="card">
-Dana Darurat
-<div class="big asset" id="darurat">Rp 0</div>
-</div>
-
-<div class="card">
-Investasi
-<div class="big asset" id="investasi">Rp 0</div>
-</div>
-
-<div class="card">
-Pengeluaran
-<div class="big expense" id="expense">Rp 0</div>
-</div>
-
+<div class="card">Asset<div class="big asset" id="asset">Rp 0</div></div>
+<div class="card">Dana Darurat<div class="big asset" id="darurat">Rp 0</div></div>
+<div class="card">Investasi<div class="big asset" id="investasi">Rp 0</div></div>
+<div class="card">Pengeluaran<div class="big expense" id="expense">Rp 0</div></div>
 </div>
 
 <!-- CHART -->
-
 <div class="card">
-
-<h3>Grafik Keuangan Bulanan</h3>
-
-<div style="margin-bottom:10px">
+<h3>Grafik Keuangan</h3>
 
 <select id="bulan">
-<option value="all">Semua Bulan</option>
+<option value="all">Semua</option>
 <option value="1">Jan</option>
 <option value="2">Feb</option>
 <option value="3">Mar</option>
 <option value="4">Apr</option>
-<option value="5">Mei</option>
-<option value="6">Jun</option>
-<option value="7">Jul</option>
-<option value="8">Agu</option>
-<option value="9">Sep</option>
-<option value="10">Okt</option>
-<option value="11">Nov</option>
-<option value="12">Des</option>
 </select>
 
-<button onclick="refreshDashboard()">Lihat</button>
+<button onclick="refreshDashboard()">Refresh</button>
 <button onclick="downloadPDF()">Download PDF</button>
 
-</div>
-
 <canvas id="chartLine"></canvas>
-
 </div>
 
-<!-- TRANSAKSI -->
-
+<!-- FORM TAMBAH -->
 <div class="card">
+<h3>Tambah Transaksi</h3>
 
+<input id="f_kategori" placeholder="Kategori">
+<input id="f_tujuan" placeholder="Tujuan">
+<input id="f_jumlah" type="number" placeholder="Jumlah">
+<input id="f_deskripsi" placeholder="Deskripsi">
+
+<button onclick="tambahTransaksi()">Tambah Transaksi</button>
+</div>
+
+<!-- TABLE -->
+<div class="card">
 <h3>Daftar Transaksi</h3>
-
 <table>
-
 <thead>
-
 <tr>
-
 <th>Tanggal</th>
 <th>Kategori</th>
 <th>Metode</th>
 <th>Tujuan</th>
 <th style="text-align:right">Jumlah</th>
-
 </tr>
-
 </thead>
-
 <tbody id="table"></tbody>
-
 </table>
+</div>
 
 </div>
 
 <script>
 
 const API="https://finance-worker.ebeneserpinem6.workers.dev"
+const PASSWORD="123456"
 
 let chart
+let loggedIn=false
+let idleTimer
+
+/* LOGIN */
+
+function login(){
+const pass=password.value
+
+if(pass===PASSWORD){
+loggedIn=true
+showApp()
+startIdleTimer()
+}else{
+error.innerText="Password salah"
+}
+}
+
+function logout(){
+loggedIn=false
+alert("Session berakhir")
+location.reload()
+}
+
+function showApp(){
+loginScreen.style.display="none"
+app.style.display="block"
+refreshDashboard()
+}
+
+/* AUTO LOGOUT 3 MENIT */
+
+function resetIdle(){
+clearTimeout(idleTimer)
+idleTimer=setTimeout(logout,180000)
+}
+
+function startIdleTimer(){
+["mousemove","click","keydown","scroll"]
+.forEach(evt=>document.addEventListener(evt,resetIdle))
+resetIdle()
+}
+
+/* DASHBOARD */
 
 async function refreshDashboard(){
 
-try{
-
-/* SUMMARY */
+if(!loggedIn) return
 
 const res=await fetch(API+"/api/data")
 const d=await res.json()
 
-const asset=d.dana_darurat+d.investasi
+const assetTotal=d.dana_darurat+d.investasi
 
-document.getElementById("net").innerText=
-"Rp "+d.saldo_net_display.toLocaleString('id-ID')
+net.innerText="Rp "+d.saldo_net_display.toLocaleString('id-ID')
+asset.innerText="Rp "+assetTotal.toLocaleString('id-ID')
+darurat.innerText="Rp "+d.dana_darurat.toLocaleString('id-ID')
+investasi.innerText="Rp "+d.investasi.toLocaleString('id-ID')
+expense.innerText="Rp "+d.pengeluaran.toLocaleString('id-ID')
 
-document.getElementById("asset").innerText=
-"Rp "+asset.toLocaleString('id-ID')
-
-document.getElementById("darurat").innerText=
-"Rp "+d.dana_darurat.toLocaleString('id-ID')
-
-document.getElementById("investasi").innerText=
-"Rp "+d.investasi.toLocaleString('id-ID')
-
-document.getElementById("expense").innerText=
-"Rp "+d.pengeluaran.toLocaleString('id-ID')
-
-document.getElementById("update").innerText=
-new Date().toLocaleTimeString()
+update.innerText=new Date().toLocaleTimeString()
 
 /* CHART */
-
 const bulan=document.getElementById("bulan").value
-
 const chartRes=await fetch(API+"/api/chart?bulan="+bulan)
 const data=await chartRes.json()
 
@@ -233,133 +285,78 @@ const ctx=document.getElementById("chartLine")
 if(chart) chart.destroy()
 
 chart=new Chart(ctx,{
-
 type:'line',
-
 data:{
-
 labels:data.bulan,
-
 datasets:[
-
-{
-label:'Asset',
-data:data.asset,
-borderColor:'#22c55e',
-backgroundColor:'transparent',
-tension:0.3
-},
-
-{
-label:'Pengeluaran',
-data:data.pengeluaran,
-borderColor:'#ef4444',
-backgroundColor:'transparent',
-tension:0.3
-}
-
+{label:'Asset',data:data.asset,borderColor:'#22c55e',tension:.3},
+{label:'Pengeluaran',data:data.pengeluaran,borderColor:'#ef4444',tension:.3}
 ]
-
-},
-
-options:{
-
-plugins:{
-legend:{labels:{color:'white'}}
-},
-
-scales:{
-x:{ticks:{color:'white'}},
-y:{ticks:{color:'white'}}
 }
-
-}
-
 })
 
-/* TRANSAKSI */
+loadTransaksi()
+}
 
-const resTable=await fetch(API+"/api/transaksi")
-const list=await resTable.json()
+/* LOAD TABLE */
 
-const tbody=document.getElementById("table")
+async function loadTransaksi(){
 
-tbody.innerHTML=list.map(t=>{
+const res=await fetch(API+"/api/transaksi")
+const list=await res.json()
+
+table.innerHTML=list.map(t=>{
 
 let metode="Transfer"
-
-if(
-t.deskripsi &&
-t.deskripsi.toLowerCase().includes("qris")
-){
-metode="QRIS"
-}
+if(t.deskripsi?.toLowerCase().includes("qris")) metode="QRIS"
 
 const date=new Date(t.tanggal)
 
-const tanggal=date.toLocaleDateString('id-ID')
-
-const waktu=date.toLocaleTimeString('id-ID')
-
-return`
-
+return `
 <tr>
-
-<td>
-${tanggal}<br>
-<small style="color:#94a3b8">${waktu}</small>
-</td>
-
+<td>${date.toLocaleDateString('id-ID')}</td>
 <td>${t.kategori}</td>
-
-<td class="${
-metode=="QRIS"?"qris":"transfer"
-}">
-${metode}
-</td>
-
+<td class="${metode=="QRIS"?"qris":"transfer"}">${metode}</td>
 <td>${t.tujuan ?? "-"}</td>
-
 <td class="nominal" style="text-align:right">
 Rp ${t.jumlah.toLocaleString('id-ID')}
 </td>
-
 </tr>
-
 `
-
 }).join("")
-
-}catch(e){
-
-console.log("update gagal",e)
-
 }
 
+/* TAMBAH TRANSAKSI */
+
+async function tambahTransaksi(){
+
+const data={
+kategori:f_kategori.value,
+tujuan:f_tujuan.value,
+jumlah:Number(f_jumlah.value),
+deskripsi:f_deskripsi.value
 }
 
-function downloadPDF(){
+await fetch(API+"/api/transaksi",{
+method:"POST",
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify(data)
+})
 
-const element=document.body
-
-html2pdf().set({
-
-margin:10,
-filename:'laporan_keuangan.pdf',
-image:{type:'jpeg',quality:0.98},
-html2canvas:{scale:2},
-jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
-
-}).from(element).save()
-
-}
+alert("Transaksi berhasil ditambahkan")
 
 refreshDashboard()
+}
+
+/* PDF */
+
+function downloadPDF(){
+html2pdf().from(document.body).save("laporan_keuangan.pdf")
+}
 
 setInterval(refreshDashboard,10000)
 
 </script>
 
 </body>
-
 </html>
