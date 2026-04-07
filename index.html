@@ -1,203 +1,97 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-<meta charset="UTF-8">
-<title>Keuangan</title>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-body{
-font-family:Arial;
-background:#f5f5f5;
-padding:20px;
-}
-
-.card{
-background:white;
-padding:20px;
-margin-bottom:20px;
-border-radius:10px;
-box-shadow:0 0 5px rgba(0,0,0,0.1);
-}
-
-input,select,button{
-padding:8px;
-margin:5px;
-}
-
-table{
-width:100%;
-border-collapse:collapse;
-}
-
-td,th{
-border-bottom:1px solid #ddd;
-padding:8px;
-}
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; max-width: 1000px; margin: auto; padding: 20px; }
+        .card { background: #1e293b; padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #334155; }
+        .grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; }
+        h2 { color: #38bdf8; margin: 0; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { padding: 12px; border-bottom: 1px solid #334155; text-align: left; }
+        .nominal { font-family: monospace; font-weight: bold; color: #10b981; }
+        .text-net { color: #38bdf8; font-size: 2.8em; font-weight: bold; margin: 10px 0; }
+        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+    </style>
 </head>
-
 <body>
 
-<div class="card">
-<h2>Saldo</h2>
+    <div class="card" style="text-align: center; border-top: 4px solid #38bdf8;">
+        <h2>💰 Total Saldo Net</h2>
+        <div class="text-net" id="saldo-net">Rp 0</div>
+        <p style="color: #94a3b8; font-size: 0.9em;">Update Terakhir: <span id="last-update">-</span></p>
+    </div>
 
-<p>Net Saldo : <b id="saldo">0</b></p>
-<p>Dana Darurat : <b id="darurat">0</b></p>
-<p>Investasi : <b id="investasi">0</b></p>
-<p>Total Asset : <b id="asset">0</b></p>
+    <div class="grid">
+        <div class="card">
+            <h3>📊 Alokasi Dana</h3>
+            <div style="max-width: 280px; margin: auto;">
+                <canvas id="chartAlokasi"></canvas>
+            </div>
+        </div>
+        <div class="card">
+            <h3>📝 Transaksi Terakhir</h3>
+            <table id="table">
+                <thead>
+                    <tr>
+                        <th>Rekening</th>
+                        <th>Kategori</th>
+                        <th style="text-align: right;">Jumlah</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
 
-<canvas id="pieChart"></canvas>
-</div>
+    <script>
+        const API = "https://finance-worker.ebeneserpinem6.workers.dev";
+        let myChart;
 
-<div class="card">
+        async function refreshDashboard() {
+            try {
+                // 1. Ambil Data Summary
+                const resData = await fetch(API + "/api/data");
+                const d = await resData.json();
+                
+                document.getElementById("saldo-net").innerText = "Rp " + d.saldo_net_display.toLocaleString('id-ID');
+                document.getElementById("last-update").innerText = new Date().toLocaleTimeString();
 
-<h3>Tambah Transaksi</h3>
+                const ctx = document.getElementById("chartAlokasi").getContext("2d");
+                if (myChart) myChart.destroy();
+                myChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Dana Darurat', 'Investasi', 'Pengeluaran'],
+                        datasets: [{
+                            data: [d.dana_darurat, d.investasi, d.pengeluaran],
+                            backgroundColor: ['#facc15', '#22c55e', '#ef4444'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: { plugins: { legend: { position: 'bottom', labels: { color: 'white' } } } }
+                });
 
-<input id="jumlah" type="number" placeholder="Jumlah">
+                // 2. Ambil List Transaksi
+                const resTable = await fetch(API + "/api/transaksi");
+                const list = await resTable.json();
+                const tbody = document.querySelector("#table tbody");
+                tbody.innerHTML = list.map(t => `
+                    <tr>
+                        <td><small style="color:#38bdf8">${t.no_rekening}</small><br>${t.tanggal}</td>
+                        <td>${t.kategori.toUpperCase()}</td>
+                        <td class="nominal" style="text-align:right">Rp ${t.jumlah.toLocaleString('id-ID')}</td>
+                    </tr>
+                `).join("");
 
-<select id="jenis">
-<option value="masuk">Dana diterima</option>
-<option value="qris">QRIS</option>
-<option value="pengeluaran">Pengeluaran</option>
-<option value="darurat">Dana Darurat</option>
-<option value="investasi">Investasi</option>
-</select>
+            } catch (e) { console.error("Update failed", e); }
+        }
 
-<button onclick="kirim()">Simpan</button>
-
-</div>
-
-<div class="card">
-
-<h3>List Transaksi</h3>
-
-<table>
-<thead>
-<tr>
-<th>Tanggal</th>
-<th>Jenis</th>
-<th>Jumlah</th>
-</tr>
-</thead>
-
-<tbody id="list"></tbody>
-
-</table>
-
-</div>
-
-<script>
-
-const workerURL="ISI_URL_WORKER_KAMU";
-
-let chart;
-
-async function load(){
-
-const r = await fetch(workerURL+"?action=get");
-
-const data = await r.json();
-
-hitung(data.transaksi);
-
-}
-
-function hitung(transaksi){
-
-let saldo=0;
-let darurat=0;
-let investasi=0;
-
-let html="";
-
-transaksi.reverse().forEach(t=>{
-
-let j=Number(t.jumlah);
-
-if(t.jenis=="masuk"){
-saldo+=j;
-}
-
-if(t.jenis=="pengeluaran"){
-saldo-=j;
-}
-
-if(t.jenis=="qris"){
-saldo-=j;
-}
-
-if(t.jenis=="darurat"){
-saldo-=j;
-darurat+=j;
-}
-
-if(t.jenis=="investasi"){
-saldo-=j;
-investasi+=j;
-}
-
-html+=`
-<tr>
-<td>${t.tanggal}</td>
-<td>${t.jenis}</td>
-<td>${j}</td>
-</tr>
-`;
-
-});
-
-document.getElementById("saldo").innerText=saldo;
-document.getElementById("darurat").innerText=darurat;
-document.getElementById("investasi").innerText=investasi;
-document.getElementById("asset").innerText=darurat+investasi;
-
-document.getElementById("list").innerHTML=html;
-
-pie(darurat,investasi);
-
-}
-
-function pie(darurat,investasi){
-
-if(chart){
-chart.destroy();
-}
-
-chart=new Chart(document.getElementById("pieChart"),{
-type:"pie",
-data:{
-labels:["Dana Darurat","Investasi"],
-datasets:[{
-data:[darurat,investasi]
-}]
-}
-});
-
-}
-
-async function kirim(){
-
-let jumlah=document.getElementById("jumlah").value;
-let jenis=document.getElementById("jenis").value;
-
-await fetch(workerURL,{
-method:"POST",
-body:JSON.stringify({
-jumlah:jumlah,
-jenis:jenis
-})
-});
-
-load();
-
-}
-
-load();
-
-</script>
-
+        refreshDashboard();
+        setInterval(refreshDashboard, 10000); // Auto-refresh tiap 10 detik
+    </script>
 </body>
 </html>
