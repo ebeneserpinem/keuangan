@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Finance Asset Dashboard</title>
+    <title>Finance Dashboard Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --border: #334155; --primary: #38bdf8; --success: #22c55e; --danger: #ef4444; --text: #f8fafc; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
-        .container { max-width: 1100px; margin: auto; }
+        .container { max-width: 1200px; margin: auto; }
         .card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 20px; }
         .grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
-        .grid-main { display: grid; grid-template-columns: 1.2fr 1.8fr; gap: 20px; }
-        @media (max-width: 850px) { .grid-main { grid-template-columns: 1fr; } }
+        .grid-split { display: grid; grid-template-columns: 1.2fr 1.8fr; gap: 20px; }
+        @media (max-width: 850px) { .grid-split { grid-template-columns: 1fr; } }
         
         input, select { width: 100%; padding: 10px; margin: 8px 0; border-radius: 8px; border: 1px solid var(--border); background: #0f172a; color: white; box-sizing: border-box; }
         .big-val { font-size: 1.8em; font-weight: 800; margin-top: 5px; }
@@ -25,25 +24,16 @@
         
         button { background: var(--primary); border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; color: white; font-weight: bold; }
         .btn-del { background: var(--danger); padding: 4px 8px; font-size: 11px; }
-        #login-screen { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 10000; }
-        #pdf-template { display: none; background: white; color: black; padding: 40px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-<div id="login-screen">
-    <div class="card" style="width: 300px; text-align: center;">
-        <h3>Asset Manager</h3>
-        <input type="password" id="passInput" placeholder="Password">
-        <button onclick="login()" style="width: 100%; margin-top: 10px;">Login</button>
-    </div>
-</div>
-
-<div id="main-content" class="container" style="display: none;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+<div class="container">
+    <div class="header">
         <h2 style="margin:0">Dashboard Aset</h2>
-        <div>
-            <button onclick="downloadPDF()" style="background:#64748b">Export PDF</button>
+        <div style="display:flex; gap:10px;">
+            <select id="filterBulan" onchange="refresh()" style="margin:0; width:180px;"></select>
             <button onclick="logout()" style="background:var(--danger)">Logout</button>
         </div>
     </div>
@@ -52,32 +42,37 @@
         <div class="grid3" style="align-items: end;">
             <div><label>Kategori</label>
                 <select id="f-kat">
-                    <option value="pemasukan">Pemasukan (Cash In)</option>
+                    <option value="pemasukan">Pemasukan (Uang Masuk)</option>
                     <option value="pengeluaran">Pengeluaran</option>
                     <option value="investasi">Investasi</option>
                     <option value="dana_darurat">Dana Darurat</option>
                 </select>
             </div>
-            <div><label>Deskripsi</label><input type="text" id="f-desc" placeholder="Keterangan transaksi"></div>
+            <div><label>Deskripsi</label><input type="text" id="f-desc" placeholder="Contoh: Gaji April"></div>
             <div><label>Nominal</label><input type="number" id="f-amt" placeholder="0"></div>
-            <button onclick="simpan()" style="background:var(--success); width: 100%;">Simpan</button>
+            <button onclick="simpan()" style="background:var(--success); width:100%; height:42px;">Simpan</button>
         </div>
     </div>
 
     <div class="grid3">
-        <div class="card">Total Aset (A+B)<div id="v-asset" class="big-val c-asset">Rp 0</div></div>
+        <div class="card">Total Aset (Inv + DD)<div id="v-asset" class="big-val c-asset">Rp 0</div></div>
         <div class="card">Pengeluaran<div id="v-exp" class="big-val c-expense">Rp 0</div></div>
-        <div class="card">Saldo Bersih (Sisa)<div id="v-net" class="big-val c-net">Rp 0</div></div>
+        <div class="card">Saldo Bersih<div id="v-net" class="big-val c-net">Rp 0</div></div>
     </div>
 
-    <div class="grid-main">
+    <div class="card">
+        <h3>Tren Pertumbuhan Aset (6 Bulan Terakhir)</h3>
+        <canvas id="chartLinear" style="max-height: 250px;"></canvas>
+    </div>
+
+    <div class="grid-split">
         <div class="card" style="text-align: center;">
-            <h3>Porsi Aset</h3>
-            <canvas id="chartPie" style="max-height: 300px;"></canvas>
+            <h3>Porsi Aset Bulan Ini</h3>
+            <canvas id="chartPie" style="max-height: 250px;"></canvas>
         </div>
         <div class="card">
-            <h3>Riwayat</h3>
-            <div style="overflow-y: auto; max-height: 400px;">
+            <h3>Riwayat Transaksi</h3>
+            <div style="overflow-y: auto; max-height: 350px;">
                 <table>
                     <thead><tr><th>Tanggal</th><th>Deskripsi</th><th class="nominal">Nominal</th><th>Aksi</th></tr></thead>
                     <tbody id="tableBody"></tbody>
@@ -87,52 +82,75 @@
     </div>
 </div>
 
-<div id="pdf-template">
-    <h1 style="text-align:center; border-bottom: 2px solid #000;">LAPORAN ASET & KEUANGAN</h1>
-    <div id="pdf-header" style="margin: 20px 0;"></div>
-    <table style="width: 100%; border: 1px solid #000; border-collapse: collapse;">
-        <thead><tr style="background:#eee"><th>Tanggal</th><th>Deskripsi</th><th>Kategori</th><th style="text-align:right">Nominal</th></tr></thead>
-        <tbody id="pdf-table-body"></tbody>
-    </table>
-</div>
-
 <script>
     const API = "https://finance-worker.ebeneserpinem6.workers.dev";
-    let myChart, logoutTimer;
+    let pieChart, lineChart;
 
-    function resetTimer() { clearTimeout(logoutTimer); logoutTimer = setTimeout(logout, 180000); }
-    window.onmousemove = resetTimer; window.onkeydown = resetTimer;
-
-    function login() {
-        if(document.getElementById('passInput').value === "12345") {
-            localStorage.setItem("session", "valid");
-            checkAuth();
-        } else { alert("Salah"); }
-    }
-    function logout() { localStorage.removeItem("session"); location.reload(); }
-    
-    function checkAuth() {
-        if(localStorage.getItem("session")) {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('main-content').style.display = 'block';
-            refresh();
+    // 1. Inisialisasi Dropdown Bulan (Dinamis)
+    function initFilter() {
+        const select = document.getElementById('filterBulan');
+        const now = new Date();
+        for (let i = 0; i < 12; i++) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const val = d.toISOString().slice(0, 7);
+            const label = d.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+            select.innerHTML += `<option value="${val}">${label}</option>`;
         }
     }
 
+    // 2. Refresh Data
     async function refresh() {
-        const res = await fetch(API + "/api/data");
+        const bulan = document.getElementById('filterBulan').value;
+        const res = await fetch(`${API}/api/data?bulan=${bulan}`);
         const d = await res.json();
         
         document.getElementById("v-asset").innerText = "Rp " + d.totalAsset.toLocaleString('id-ID');
         document.getElementById("v-exp").innerText = "Rp " + d.pengeluaran.toLocaleString('id-ID');
         document.getElementById("v-net").innerText = "Rp " + d.saldoBersih.toLocaleString('id-ID');
 
-        updateChart(d.investasi, d.dana_darurat);
-        loadTable();
+        updateCharts(d);
+        loadTable(bulan);
     }
 
-    async function loadTable() {
-        const res = await fetch(API + "/api/transaksi");
+    // 3. Update Grafik
+    function updateCharts(data) {
+        // Pie Chart
+        const ctxP = document.getElementById('chartPie');
+        if(pieChart) pieChart.destroy();
+        pieChart = new Chart(ctxP, {
+            type: 'pie',
+            data: {
+                labels: ['Investasi', 'Dana Darurat'],
+                datasets: [{ data: [data.investasi, data.dana_darurat], backgroundColor: ['#22c55e', '#38bdf8'] }]
+            },
+            options: { plugins: { legend: { position: 'bottom', labels: { color: 'white' } } } }
+        });
+
+        // Line Chart (Tren)
+        const ctxL = document.getElementById('chartLinear');
+        if(lineChart) lineChart.destroy();
+        lineChart = new Chart(ctxL, {
+            type: 'line',
+            data: {
+                labels: data.trend.map(t => t.bln),
+                datasets: [
+                    { label: 'Investasi', data: data.trend.map(t => t.i), borderColor: '#22c55e', tension: 0.3 },
+                    { label: 'Dana Darurat', data: data.trend.map(t => t.d), borderColor: '#38bdf8', tension: 0.3 }
+                ]
+            },
+            options: { 
+                plugins: { legend: { labels: { color: 'white' } } },
+                scales: { 
+                    y: { grid: { color: '#334155' }, ticks: { color: 'gray' } },
+                    x: { grid: { display: false }, ticks: { color: 'gray' } }
+                }
+            }
+        });
+    }
+
+    // 4. Load Tabel
+    async function loadTable(bulan) {
+        const res = await fetch(`${API}/api/transaksi?bulan=${bulan}`);
         const list = await res.json();
         document.getElementById("tableBody").innerHTML = list.map(t => `
             <tr>
@@ -148,10 +166,10 @@
         const payload = {
             deskripsi: document.getElementById('f-desc').value,
             jumlah: parseFloat(document.getElementById('f-amt').value),
-            kategori: document.getElementById('f-kat').value,
-            email_id: "user@mail.com"
+            kategori: document.getElementById('f-kat').value
         };
-        await fetch(API + "/api/tambah", { method: "POST", body: JSON.stringify(payload) });
+        if(!payload.deskripsi || !payload.jumlah) return alert("Isi data!");
+        await fetch(`${API}/api/tambah`, { method: "POST", body: JSON.stringify(payload) });
         document.getElementById('f-desc').value = ""; document.getElementById('f-amt').value = "";
         refresh();
     }
@@ -163,38 +181,10 @@
         }
     }
 
-    function updateChart(inv, darurat) {
-        const ctx = document.getElementById('chartPie');
-        if(myChart) myChart.destroy();
-        myChart = new Chart(ctx, {
-            type: 'pie', // Diubah ke Pie (lingkaran penuh)
-            data: {
-                labels: ['Investasi', 'Dana Darurat'],
-                datasets: [{
-                    data: [inv, darurat],
-                    backgroundColor: ['#22c55e', '#38bdf8'],
-                    borderWidth: 0
-                }]
-            },
-            options: { 
-                plugins: { 
-                    legend: { position: 'bottom', labels: { color: 'white' } } 
-                } 
-            }
-        });
-    }
+    function logout() { localStorage.clear(); location.reload(); }
 
-    function downloadPDF() {
-        const area = document.getElementById('pdf-template');
-        document.getElementById('pdf-header').innerHTML = `
-            <p>Total Aset: <b>${document.getElementById('v-asset').innerText}</b></p>
-            <p>Saldo Bersih: <b>${document.getElementById('v-net').innerText}</b></p>
-        `;
-        area.style.display = 'block';
-        html2pdf().from(area).set({ margin: 10, filename: 'Laporan_Aset.pdf' }).save().then(() => area.style.display = 'none');
-    }
-
-    checkAuth();
+    initFilter();
+    refresh();
 </script>
 </body>
 </html>
