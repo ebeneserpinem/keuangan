@@ -1,3 +1,166 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Finance Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2pdf.js"></script>
+
+<style>
+
+body{
+font-family:'Segoe UI',sans-serif;
+background:#0f172a;
+color:white;
+max-width:1100px;
+margin:auto;
+padding:20px;
+}
+
+.card{
+background:#1e293b;
+padding:20px;
+border-radius:14px;
+border:1px solid #334155;
+margin-bottom:20px;
+}
+
+.grid4{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:15px;
+}
+
+.gridChart{
+display:grid;
+grid-template-columns:2fr 1fr;
+gap:20px;
+}
+
+.big{
+font-size:1.8em;
+font-weight:bold;
+margin-top:8px;
+}
+
+.net{color:#38bdf8}
+.asset{color:#22c55e}
+.expense{color:#ef4444}
+
+canvas{
+max-height:240px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+font-size:13px;
+}
+
+th,td{
+padding:10px;
+border-bottom:1px solid #334155;
+}
+
+.nominal{
+text-align:right;
+font-family:monospace;
+font-weight:bold;
+}
+
+.qris{color:#22c55e}
+.transfer{color:#38bdf8}
+
+button{
+background:#38bdf8;
+border:none;
+padding:6px 10px;
+border-radius:6px;
+cursor:pointer;
+color:white;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- NET -->
+<div class="card" style="text-align:center">
+<h2>Net Saldo</h2>
+<div id="net" class="big net">Rp 0</div>
+</div>
+
+<!-- TOTAL -->
+<div class="grid4">
+
+<div class="card">
+Dana Darurat
+<div id="darurat" class="big asset">Rp 0</div>
+</div>
+
+<div class="card">
+Investasi
+<div id="investasi" class="big asset">Rp 0</div>
+</div>
+
+<div class="card">
+Pengeluaran
+<div id="expense" class="big expense">Rp 0</div>
+</div>
+
+<div class="card">
+Total Asset
+<div id="asset" class="big asset">Rp 0</div>
+</div>
+
+</div>
+
+<!-- CHART -->
+<div class="gridChart">
+
+<div class="card">
+<h3>Grafik Keuangan</h3>
+<canvas id="chartLine"></canvas>
+</div>
+
+<div class="card">
+<h3>Komposisi Asset</h3>
+<canvas id="chartPie"></canvas>
+</div>
+
+</div>
+
+<!-- TRANSAKSI -->
+<div class="card">
+
+<h3>Daftar Transaksi</h3>
+
+<button onclick="downloadPDF()">Download PDF</button>
+
+<table>
+<thead>
+<tr>
+<th>Tanggal</th>
+<th>Waktu</th>
+<th>Kategori</th>
+<th>Metode</th>
+<th>Tujuan</th>
+<th class="nominal">Nominal</th>
+<th>Aksi</th>
+</tr>
+</thead>
+
+<tbody id="table"></tbody>
+
+</table>
+
+</div>
+
 <script>
 
 const API="https://finance-worker.ebeneserpinem6.workers.dev"
@@ -9,7 +172,7 @@ async function refreshDashboard(){
 
 try{
 
-/* ================= SUMMARY ================= */
+/* ========= SUMMARY ========= */
 
 const res=await fetch(API+"/api/data")
 const d=await res.json()
@@ -31,7 +194,8 @@ document.getElementById("expense").innerText=
 document.getElementById("asset").innerText=
 "Rp "+asset.toLocaleString('id-ID')
 
-/* ================= LINE CHART ================= */
+
+/* ========= LINE CHART ========= */
 
 const chartRes=await fetch(API+"/api/chart")
 const data=await chartRes.json()
@@ -68,7 +232,7 @@ y:{ticks:{color:'white'}}
 }
 })
 
-/* ================= PIE CHART ================= */
+/* ========= PIE CHART ========= */
 
 const pie=document.getElementById("chartPie")
 
@@ -88,7 +252,7 @@ plugins:{legend:{labels:{color:'white'}}}
 }
 })
 
-/* ================= TABLE ================= */
+/* ========= TRANSAKSI ========= */
 
 const resTable=await fetch(API+"/api/transaksi")
 const list=await resTable.json()
@@ -99,18 +263,34 @@ tbody.innerHTML=list.map(t=>{
 
 const date=new Date(t.tanggal)
 
+const tanggal=date.toLocaleDateString('id-ID',{
+day:'2-digit',
+month:'2-digit'
+})
+
+const waktu=date.toLocaleTimeString('id-ID',{
+hour:'2-digit',
+minute:'2-digit'
+})
+
+let metode="Transfer"
+if(t.deskripsi &&
+t.deskripsi.toLowerCase().includes("qris")){
+metode="QRIS"
+}
+
 return `
 <tr>
-<td>${date.toLocaleDateString('id-ID')}</td>
+<td>${tanggal}</td>
+<td>${waktu}</td>
 <td>${t.kategori}</td>
+<td class="${metode=="QRIS"?"qris":"transfer"}">${metode}</td>
 <td>${t.tujuan ?? "-"}</td>
-<td style="text-align:right">
-Rp ${t.jumlah.toLocaleString('id-ID')}
+<td class="nominal">
+Rp ${Number(t.jumlah).toLocaleString('id-ID')}
 </td>
 <td>
-<button onclick="hapus('${t.id}')">
-Hapus
-</button>
+<button onclick="hapus('${t.id}')">Hapus</button>
 </td>
 </tr>
 `
@@ -123,7 +303,7 @@ console.log("error",e)
 
 }
 
-/* ================= HAPUS ================= */
+/* ========= HAPUS ========= */
 
 async function hapus(id){
 
@@ -136,18 +316,16 @@ method:"DELETE"
 refreshDashboard()
 }
 
-/* ================= PDF FIX ================= */
+/* ========= PDF ========= */
 
 function downloadPDF(){
-
-const element=document.body
 
 html2pdf().set({
 margin:10,
 filename:'laporan_keuangan.pdf',
 html2canvas:{scale:2},
 jsPDF:{unit:'mm',format:'a4'}
-}).from(element).save()
+}).from(document.body).save()
 
 }
 
@@ -155,3 +333,6 @@ refreshDashboard()
 setInterval(refreshDashboard,10000)
 
 </script>
+
+</body>
+</html>
