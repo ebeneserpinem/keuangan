@@ -13,17 +13,12 @@
         .grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
         .grid-split { display: grid; grid-template-columns: 1.2fr 1.8fr; gap: 20px; }
         @media (max-width: 850px) { .grid-split { grid-template-columns: 1fr; } }
-        
         input, select { width: 100%; padding: 10px; margin: 8px 0; border-radius: 8px; border: 1px solid var(--border); background: #0f172a; color: white; box-sizing: border-box; }
         .big-val { font-size: 1.8em; font-weight: 800; margin-top: 5px; }
         .c-asset { color: var(--success); } .c-expense { color: var(--danger); } .c-net { color: var(--primary); }
-        
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
         th, td { padding: 12px; border-bottom: 1px solid var(--border); text-align: left; }
-        .nominal { text-align: right; font-family: monospace; font-weight: bold; }
-        
         button { background: var(--primary); border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; color: white; font-weight: bold; }
-        .btn-del { background: var(--danger); padding: 4px 8px; font-size: 11px; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     </style>
 </head>
@@ -33,8 +28,10 @@
     <div class="header">
         <h2 style="margin:0">Dashboard Aset</h2>
         <div style="display:flex; gap:10px;">
-            <select id="filterBulan" onchange="refresh()" style="margin:0; width:180px;"></select>
-            <button onclick="logout()" style="background:var(--danger)">Logout</button>
+            <select id="filterBulan" onchange="refresh()" style="margin:0; width:200px;">
+                <option value="">Semua Waktu (Lihat Data Lama)</option>
+            </select>
+            <button onclick="location.reload()" style="background:#475569">Refresh</button>
         </div>
     </div>
 
@@ -48,14 +45,14 @@
                     <option value="dana_darurat">Dana Darurat</option>
                 </select>
             </div>
-            <div><label>Deskripsi</label><input type="text" id="f-desc" placeholder="Contoh: Gaji April"></div>
+            <div><label>Deskripsi</label><input type="text" id="f-desc" placeholder="Keterangan"></div>
             <div><label>Nominal</label><input type="number" id="f-amt" placeholder="0"></div>
             <button onclick="simpan()" style="background:var(--success); width:100%; height:42px;">Simpan</button>
         </div>
     </div>
 
     <div class="grid3">
-        <div class="card">Total Aset (Inv + DD)<div id="v-asset" class="big-val c-asset">Rp 0</div></div>
+        <div class="card">Total Aset (A+B)<div id="v-asset" class="big-val c-asset">Rp 0</div></div>
         <div class="card">Pengeluaran<div id="v-exp" class="big-val c-expense">Rp 0</div></div>
         <div class="card">Saldo Bersih<div id="v-net" class="big-val c-net">Rp 0</div></div>
     </div>
@@ -67,14 +64,14 @@
 
     <div class="grid-split">
         <div class="card" style="text-align: center;">
-            <h3>Porsi Aset Bulan Ini</h3>
+            <h3>Porsi Aset</h3>
             <canvas id="chartPie" style="max-height: 250px;"></canvas>
         </div>
         <div class="card">
             <h3>Riwayat Transaksi</h3>
             <div style="overflow-y: auto; max-height: 350px;">
                 <table>
-                    <thead><tr><th>Tanggal</th><th>Deskripsi</th><th class="nominal">Nominal</th><th>Aksi</th></tr></thead>
+                    <thead><tr><th>Tanggal</th><th>Deskripsi</th><th style="text-align:right">Nominal</th><th>Aksi</th></tr></thead>
                     <tbody id="tableBody"></tbody>
                 </table>
             </div>
@@ -86,19 +83,17 @@
     const API = "https://finance-worker.ebeneserpinem6.workers.dev";
     let pieChart, lineChart;
 
-    // 1. Inisialisasi Dropdown Bulan (Dinamis)
     function initFilter() {
         const select = document.getElementById('filterBulan');
         const now = new Date();
-        for (let i = 0; i < 12; i++) {
+        for (let i = 0; i < 6; i++) {
             const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
             const val = d.toISOString().slice(0, 7);
             const label = d.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
-            select.innerHTML += `<option value="${val}">${label}</option>`;
+            select.innerHTML += `<option value="${val}" ${i === 0 ? 'selected' : ''}>${label}</option>`;
         }
     }
 
-    // 2. Refresh Data
     async function refresh() {
         const bulan = document.getElementById('filterBulan').value;
         const res = await fetch(`${API}/api/data?bulan=${bulan}`);
@@ -112,9 +107,7 @@
         loadTable(bulan);
     }
 
-    // 3. Update Grafik
     function updateCharts(data) {
-        // Pie Chart
         const ctxP = document.getElementById('chartPie');
         if(pieChart) pieChart.destroy();
         pieChart = new Chart(ctxP, {
@@ -126,7 +119,6 @@
             options: { plugins: { legend: { position: 'bottom', labels: { color: 'white' } } } }
         });
 
-        // Line Chart (Tren)
         const ctxL = document.getElementById('chartLinear');
         if(lineChart) lineChart.destroy();
         lineChart = new Chart(ctxL, {
@@ -138,17 +130,10 @@
                     { label: 'Dana Darurat', data: data.trend.map(t => t.d), borderColor: '#38bdf8', tension: 0.3 }
                 ]
             },
-            options: { 
-                plugins: { legend: { labels: { color: 'white' } } },
-                scales: { 
-                    y: { grid: { color: '#334155' }, ticks: { color: 'gray' } },
-                    x: { grid: { display: false }, ticks: { color: 'gray' } }
-                }
-            }
+            options: { plugins: { legend: { labels: { color: 'white' } } }, scales: { y: { grid: { color: '#334155' }, ticks: { color: 'gray' } }, x: { ticks: { color: 'gray' } } } }
         });
     }
 
-    // 4. Load Tabel
     async function loadTable(bulan) {
         const res = await fetch(`${API}/api/transaksi?bulan=${bulan}`);
         const list = await res.json();
@@ -156,8 +141,8 @@
             <tr>
                 <td>${new Date(t.tanggal).toLocaleDateString('id-ID')}</td>
                 <td><b>${t.deskripsi}</b><br><small>${t.kategori}</small></td>
-                <td class="nominal">Rp ${Number(t.jumlah).toLocaleString('id-ID')}</td>
-                <td><button class="btn-del" onclick="hapus('${t.id}')">Hapus</button></td>
+                <td style="text-align:right">Rp ${Number(t.jumlah).toLocaleString('id-ID')}</td>
+                <td><button onclick="hapus('${t.id}')" style="background:var(--danger); padding:4px 8px; font-size:11px; border:none; color:white; border-radius:4px; cursor:pointer;">Hapus</button></td>
             </tr>
         `).join("");
     }
@@ -168,20 +153,14 @@
             jumlah: parseFloat(document.getElementById('f-amt').value),
             kategori: document.getElementById('f-kat').value
         };
-        if(!payload.deskripsi || !payload.jumlah) return alert("Isi data!");
         await fetch(`${API}/api/tambah`, { method: "POST", body: JSON.stringify(payload) });
         document.getElementById('f-desc').value = ""; document.getElementById('f-amt').value = "";
         refresh();
     }
 
     async function hapus(id) {
-        if(confirm("Hapus?")) {
-            await fetch(`${API}/api/hapus?id=${id}`, { method: "DELETE" });
-            refresh();
-        }
+        if(confirm("Hapus?")) { await fetch(`${API}/api/hapus?id=${id}`, { method: "DELETE" }); refresh(); }
     }
-
-    function logout() { localStorage.clear(); location.reload(); }
 
     initFilter();
     refresh();
