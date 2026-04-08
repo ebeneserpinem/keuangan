@@ -1,1064 +1,179 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Sentinel Finance</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; color: white; padding: 20px; max-width: 900px; margin: auto; }
+        .card { background: #1e293b; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #334155; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .val { color: #38bdf8; font-size: 2.5em; font-weight: bold; margin: 10px 0; text-align: center; }
+        
+        /* Form Style */
+        input, select, button { width: 100%; padding: 10px; margin: 8px 0; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
+        button { background: #38bdf8; color: #0f172a; font-weight: bold; border: none; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #7dd3fc; }
+        
+        /* Table Style */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9em; }
+        th, td { padding: 12px; border-bottom: 1px solid #334155; text-align: left; }
+        th { background: #1e293b; }
+        .btn-delete { background: #ef4444; color: white; padding: 5px 10px; font-size: 0.7em; width: auto; }
 
-<style>
-:root {
-  --bg: #080c14;
-  --bg2: #0d1220;
-  --bg3: #121929;
-  --surface: rgba(255,255,255,0.04);
-  --surface-hover: rgba(255,255,255,0.07);
-  --border: rgba(255,255,255,0.07);
-  --border-active: rgba(99,102,241,0.5);
-  --text1: #f0f2f8;
-  --text2: #8892a4;
-  --text3: #4a5568;
-  --accent: #6366f1;
-  --accent2: #818cf8;
-  --green: #10b981;
-  --green-bg: rgba(16,185,129,0.1);
-  --red: #f43f5e;
-  --red-bg: rgba(244,63,94,0.1);
-  --amber: #f59e0b;
-  --amber-bg: rgba(245,158,11,0.1);
-  --radius: 16px;
-  --radius-sm: 10px;
-  --sidebar: 260px;
-  --font: 'DM Sans', sans-serif;
-  --font-display: 'Syne', sans-serif;
-  --font-mono: 'DM Mono', monospace;
-}
-
-*{margin:0;padding:0;box-sizing:border-box;}
-
-body {
-  font-family: var(--font);
-  background: var(--bg);
-  color: var(--text1);
-  min-height: 100vh;
-  display: flex;
-  overflow-x: hidden;
-}
-
-/* ─── NOISE TEXTURE OVERLAY ─── */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* ─── AMBIENT GLOW ─── */
-.ambient {
-  position: fixed;
-  border-radius: 50%;
-  filter: blur(120px);
-  pointer-events: none;
-  z-index: 0;
-  animation: driftGlow 12s ease-in-out infinite;
-}
-.ambient-1 { width: 600px; height: 600px; background: rgba(99,102,241,0.07); top: -200px; right: -100px; }
-.ambient-2 { width: 400px; height: 400px; background: rgba(16,185,129,0.05); bottom: -100px; left: 100px; animation-delay: -6s; }
-
-@keyframes driftGlow { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(20px,-20px) scale(1.05)} }
-
-/* ─── AUTH SCREEN ─── */
-#auth-screen {
-  position: fixed; inset: 0; z-index: 1000;
-  background: var(--bg);
-  display: flex; align-items: center; justify-content: center;
-}
-.auth-box {
-  width: 380px; padding: 48px 40px;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 24px;
-  text-align: center;
-  animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1);
-}
-.auth-logo {
-  font-family: var(--font-display);
-  font-size: 28px; font-weight: 800;
-  letter-spacing: -1px; margin-bottom: 6px;
-}
-.auth-logo span { color: var(--accent); }
-.auth-sub { color: var(--text2); font-size: 14px; margin-bottom: 36px; line-height: 1.5; }
-.auth-pin { display: flex; gap: 12px; justify-content: center; margin-bottom: 28px; }
-.pin-dot {
-  width: 48px; height: 56px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-mono);
-  font-size: 24px; color: var(--text1);
-  transition: all 0.2s; cursor: default;
-  user-select: none;
-}
-.pin-dot.filled { border-color: var(--accent); background: rgba(99,102,241,0.1); }
-.pin-dot.filled::after { content: '●'; font-size: 12px; }
-.pin-numpad { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
-.pin-btn {
-  padding: 16px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  color: var(--text1);
-  font-family: var(--font-display);
-  font-size: 18px; font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.pin-btn:hover { background: var(--surface-hover); border-color: rgba(255,255,255,0.14); transform: scale(1.03); }
-.pin-btn:active { transform: scale(0.97); }
-.pin-btn.clear { color: var(--text2); font-size: 14px; font-family: var(--font); }
-.pin-btn.enter { background: var(--accent); border-color: var(--accent); }
-.pin-btn.enter:hover { filter: brightness(1.15); }
-.pin-error { color: var(--red); font-size: 13px; margin-top: 16px; height: 20px; transition: 0.3s; }
-
-/* ─── SIDEBAR ─── */
-.sidebar {
-  width: var(--sidebar);
-  background: var(--bg2);
-  border-right: 1px solid var(--border);
-  height: 100vh;
-  position: sticky; top: 0;
-  display: flex; flex-direction: column;
-  padding: 28px 16px;
-  z-index: 10;
-  flex-shrink: 0;
-}
-.sidebar-logo {
-  font-family: var(--font-display);
-  font-size: 20px; font-weight: 800;
-  letter-spacing: -0.5px;
-  padding: 4px 12px 24px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 20px;
-}
-.sidebar-logo span { color: var(--accent); }
-.sidebar-logo em { color: var(--text3); font-style: normal; font-weight: 400; font-size: 11px; letter-spacing: 0; display: block; margin-top: 2px; }
-
-.nav-section { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; color: var(--text3); padding: 0 12px; margin: 8px 0 6px; text-transform: uppercase; }
-.nav-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 11px 12px;
-  border-radius: var(--radius-sm);
-  color: var(--text2);
-  font-size: 13.5px; font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  margin-bottom: 2px;
-  border: 1px solid transparent;
-}
-.nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
-.nav-item:hover { background: var(--surface-hover); color: var(--text1); }
-.nav-item.active { background: rgba(99,102,241,0.12); color: var(--accent2); border-color: rgba(99,102,241,0.2); }
-.nav-badge {
-  margin-left: auto; font-size: 10px; font-weight: 600;
-  background: var(--accent); color: white;
-  padding: 2px 7px; border-radius: 99px;
-}
-
-.sidebar-footer {
-  margin-top: auto;
-  border-top: 1px solid var(--border);
-  padding-top: 16px;
-}
-.user-chip {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 12px; border-radius: var(--radius-sm);
-  cursor: pointer; transition: 0.2s;
-  border: 1px solid transparent;
-}
-.user-chip:hover { background: var(--red-bg); border-color: rgba(244,63,94,0.2); }
-.user-avatar {
-  width: 32px; height: 32px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), #a855f7);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 700; color: white; flex-shrink: 0;
-}
-.user-info { flex: 1; min-width: 0; }
-.user-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.user-role { font-size: 11px; color: var(--text2); }
-
-@media (max-width: 900px) { .sidebar { display: none; } }
-
-/* ─── MAIN ─── */
-main {
-  flex: 1; min-width: 0;
-  padding: 32px 36px;
-  position: relative; z-index: 1;
-}
-
-/* ─── TOP BAR ─── */
-.topbar {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 36px;
-}
-.topbar-left h1 {
-  font-family: var(--font-display);
-  font-size: 22px; font-weight: 700;
-  letter-spacing: -0.5px;
-}
-.topbar-left p { color: var(--text2); font-size: 13px; margin-top: 3px; }
-.topbar-right { display: flex; gap: 10px; }
-
-/* ─── BUTTONS ─── */
-.btn {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 9px 18px;
-  border-radius: var(--radius-sm);
-  font-family: var(--font);
-  font-size: 13px; font-weight: 500;
-  cursor: pointer; border: none;
-  transition: all 0.2s; letter-spacing: 0.01em;
-  white-space: nowrap;
-}
-.btn svg { width: 14px; height: 14px; }
-.btn-ghost { background: var(--surface); color: var(--text2); border: 1px solid var(--border); }
-.btn-ghost:hover { background: var(--surface-hover); color: var(--text1); }
-.btn-primary { background: var(--accent); color: white; }
-.btn-primary:hover { filter: brightness(1.12); transform: translateY(-1px); }
-.btn-danger { background: var(--red-bg); color: var(--red); border: 1px solid rgba(244,63,94,0.2); }
-.btn-danger:hover { background: rgba(244,63,94,0.18); }
-.btn-success { background: var(--green-bg); color: var(--green); border: 1px solid rgba(16,185,129,0.2); }
-.btn-success:hover { background: rgba(16,185,129,0.18); }
-.btn:active { transform: scale(0.97); }
-
-/* ─── STAT CARDS ─── */
-.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
-@media (max-width: 1100px) { .stats-row { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 700px) { .stats-row { grid-template-columns: 1fr; } }
-
-.stat-card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 24px;
-  position: relative; overflow: hidden;
-  transition: border-color 0.3s, transform 0.3s;
-  animation: fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) backwards;
-}
-.stat-card:hover { border-color: rgba(255,255,255,0.12); transform: translateY(-2px); }
-.stat-card::before {
-  content: ''; position: absolute;
-  top: 0; right: 0; width: 120px; height: 120px;
-  border-radius: 50%;
-  filter: blur(40px);
-  opacity: 0.4;
-}
-.stat-card.green::before { background: var(--green); }
-.stat-card.red::before { background: var(--red); }
-.stat-card.blue::before { background: var(--accent); }
-
-.stat-icon {
-  width: 36px; height: 36px; border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  margin-bottom: 16px; font-size: 16px;
-}
-.stat-icon.green { background: var(--green-bg); }
-.stat-icon.red { background: var(--red-bg); }
-.stat-icon.blue { background: rgba(99,102,241,0.12); }
-.stat-label { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; }
-.stat-value {
-  font-family: var(--font-display);
-  font-size: 26px; font-weight: 700; letter-spacing: -1px;
-  line-height: 1;
-}
-.stat-value.green { color: var(--green); }
-.stat-value.red { color: var(--red); }
-.stat-value.blue { color: var(--accent2); }
-.stat-trend { font-size: 12px; color: var(--text2); margin-top: 8px; display: flex; align-items: center; gap: 4px; }
-
-/* ─── GRID 2 COL ─── */
-.grid2 { display: grid; grid-template-columns: 1fr 1.6fr; gap: 16px; margin-bottom: 24px; }
-@media (max-width: 1000px) { .grid2 { grid-template-columns: 1fr; } }
-
-/* ─── CARD ─── */
-.card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 24px;
-  transition: border-color 0.3s;
-}
-.card-title {
-  font-size: 11px; font-weight: 600; letter-spacing: 1px;
-  text-transform: uppercase; color: var(--text3); margin-bottom: 20px;
-}
-
-/* ─── GAUGE / EMERGENCY FUND ─── */
-.gauge-wrap { position: relative; width: 160px; height: 160px; flex-shrink: 0; }
-.gauge-center {
-  position: absolute; top: 50%; left: 50%;
-  transform: translate(-50%, -50%); text-align: center;
-}
-.gauge-pct { font-family: var(--font-display); font-size: 26px; font-weight: 700; line-height: 1; }
-.gauge-sub { font-size: 10px; color: var(--text3); margin-top: 3px; letter-spacing: 0.5px; }
-.fund-info { flex: 1; }
-.fund-target { font-family: var(--font-display); font-size: 20px; font-weight: 700; letter-spacing: -0.5px; margin: 4px 0 10px; }
-.fund-remaining {
-  font-size: 13px; line-height: 1.5; color: var(--text2);
-  background: var(--surface); border-radius: 10px; padding: 10px 14px;
-  border: 1px solid var(--border);
-}
-.fund-remaining strong { color: var(--amber); }
-.fund-row { display: flex; align-items: center; gap: 20px; }
-@media (max-width: 768px) { .fund-row { flex-direction: column; } }
-
-/* ─── CHART CARD ─── */
-.chart-wrap { height: 160px; position: relative; }
-
-/* ─── INPUT FORM ─── */
-.form-row { display: grid; grid-template-columns: 1fr 1.8fr 1fr auto; gap: 10px; align-items: end; }
-@media (max-width: 900px) { .form-row { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
-.form-group { display: flex; flex-direction: column; gap: 6px; }
-.form-group label { font-size: 11px; font-weight: 600; color: var(--text3); letter-spacing: 0.8px; text-transform: uppercase; }
-.form-control {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px 16px;
-  color: var(--text1);
-  font-family: var(--font);
-  font-size: 13.5px;
-  transition: all 0.2s;
-  width: 100%;
-  outline: none;
-}
-.form-control:hover { border-color: rgba(255,255,255,0.12); }
-.form-control:focus { border-color: var(--accent); background: rgba(99,102,241,0.06); box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
-.form-control::placeholder { color: var(--text3); }
-select.form-control { cursor: pointer; }
-option { background: var(--bg2); }
-
-/* ─── TABLE ─── */
-.table-card { padding: 0; overflow: hidden; }
-.table-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-.table-header .card-title { margin-bottom: 0; }
-.table-count { font-size: 11px; color: var(--text3); background: var(--surface); padding: 3px 10px; border-radius: 99px; border: 1px solid var(--border); }
-
-.table-wrap { width: 100%; overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; }
-thead th {
-  font-size: 10px; font-weight: 600; letter-spacing: 1px;
-  text-transform: uppercase; color: var(--text3);
-  padding: 12px 24px; text-align: left;
-  background: rgba(0,0,0,0.2);
-  border-bottom: 1px solid var(--border);
-  white-space: nowrap;
-}
-thead th:last-child { text-align: center; }
-
-tbody tr {
-  border-bottom: 1px solid var(--border);
-  transition: background 0.15s;
-}
-tbody tr:last-child { border-bottom: none; }
-tbody tr:hover { background: var(--surface); }
-tbody td { padding: 14px 24px; font-size: 13px; vertical-align: middle; }
-.td-date { font-family: var(--font-mono); font-size: 12px; color: var(--text2); white-space: nowrap; }
-.td-desc { font-weight: 500; }
-.td-amount { font-family: var(--font-mono); font-weight: 500; text-align: right; white-space: nowrap; }
-.td-action { text-align: center; }
-
-.pill {
-  display: inline-flex; align-items: center; gap: 4px;
-  font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
-  padding: 4px 10px; border-radius: 99px;
-  text-transform: uppercase; white-space: nowrap;
-}
-.pill-in { background: var(--green-bg); color: var(--green); }
-.pill-out { background: var(--red-bg); color: var(--red); }
-.pill-invest { background: rgba(99,102,241,0.12); color: var(--accent2); }
-.pill-dana { background: var(--amber-bg); color: var(--amber); }
-
-.del-btn {
-  width: 28px; height: 28px; border-radius: 8px;
-  background: transparent; border: 1px solid transparent;
-  color: var(--text3); cursor: pointer; font-size: 14px;
-  display: inline-flex; align-items: center; justify-content: center;
-  transition: all 0.2s;
-}
-.del-btn:hover { background: var(--red-bg); border-color: rgba(244,63,94,0.2); color: var(--red); }
-
-/* ─── EMPTY STATE ─── */
-.empty-state {
-  padding: 60px 24px; text-align: center; color: var(--text3);
-}
-.empty-state svg { width: 48px; height: 48px; margin: 0 auto 16px; display: block; opacity: 0.3; }
-.empty-state p { font-size: 13px; }
-
-/* ─── TOAST ─── */
-.toast-wrap {
-  position: fixed; bottom: 24px; right: 24px;
-  display: flex; flex-direction: column; gap: 8px;
-  z-index: 9999; pointer-events: none;
-}
-.toast {
-  min-width: 260px; padding: 14px 18px;
-  border-radius: 14px; font-size: 13px; font-weight: 500;
-  backdrop-filter: blur(20px); pointer-events: auto;
-  display: flex; align-items: center; gap: 10px;
-  animation: toastIn 0.4s cubic-bezier(0.16,1,0.3,1);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-  border: 1px solid;
-}
-.toast.success { background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.3); color: #34d399; }
-.toast.error   { background: rgba(244,63,94,0.15); border-color: rgba(244,63,94,0.3); color: #fb7185; }
-.toast.info    { background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.3); color: var(--accent2); }
-
-/* ─── LOADING ─── */
-.skeleton {
-  background: linear-gradient(90deg, var(--surface) 25%, var(--surface-hover) 50%, var(--surface) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  border-radius: 8px;
-}
-@keyframes shimmer { to { background-position: -200% 0; } }
-
-/* ─── ANIMATIONS ─── */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes toastIn {
-  from { opacity: 0; transform: translateX(20px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-@keyframes toastOut {
-  to { opacity: 0; transform: translateX(20px); }
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.fade-in { animation: fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) backwards; }
-
-/* ─── SCROLLBAR ─── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
-
-/* ─── SPINNER ─── */
-.spinner {
-  width: 18px; height: 18px;
-  border: 2px solid rgba(255,255,255,0.15);
-  border-top-color: white;
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-  display: inline-block;
-}
-
-.stagger-1 { animation-delay: 0.05s; }
-.stagger-2 { animation-delay: 0.1s; }
-.stagger-3 { animation-delay: 0.15s; }
-.stagger-4 { animation-delay: 0.2s; }
-</style>
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+    </style>
 </head>
 <body>
 
-<div class="ambient ambient-1"></div>
-<div class="ambient ambient-2"></div>
-<div class="toast-wrap" id="toastWrap"></div>
+    <h2 style="text-align: center;">💰 Personal Finance</h2>
 
-<!-- ═══ AUTH SCREEN ═══ -->
-<div id="auth-screen">
-  <div class="auth-box">
-    <div class="auth-logo"><span>S</span>entinel<span>.</span></div>
-    <div class="auth-sub">Masukkan PIN 5 digit untuk membuka brankas finansial Anda</div>
-    <div class="auth-pin" id="pinDisplay">
-      <div class="pin-dot" id="d0"></div>
-      <div class="pin-dot" id="d1"></div>
-      <div class="pin-dot" id="d2"></div>
-      <div class="pin-dot" id="d3"></div>
-      <div class="pin-dot" id="d4"></div>
-    </div>
-    <div class="pin-numpad" id="numpad">
-      <button class="pin-btn" onclick="pinPress('1')">1</button>
-      <button class="pin-btn" onclick="pinPress('2')">2</button>
-      <button class="pin-btn" onclick="pinPress('3')">3</button>
-      <button class="pin-btn" onclick="pinPress('4')">4</button>
-      <button class="pin-btn" onclick="pinPress('5')">5</button>
-      <button class="pin-btn" onclick="pinPress('6')">6</button>
-      <button class="pin-btn" onclick="pinPress('7')">7</button>
-      <button class="pin-btn" onclick="pinPress('8')">8</button>
-      <button class="pin-btn" onclick="pinPress('9')">9</button>
-      <button class="pin-btn clear" onclick="pinClear()">Hapus</button>
-      <button class="pin-btn" onclick="pinPress('0')">0</button>
-      <button class="pin-btn enter" onclick="pinSubmit()">✓</button>
-    </div>
-    <div class="pin-error" id="pinError"></div>
-  </div>
-</div>
-
-<!-- ═══ APP SHELL ═══ -->
-<div id="app" style="display:none; flex:1; display:none; min-height:100vh;">
-
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-logo">
-      <span>S</span>entinel<span>.</span>
-      <em>Financial Vault v2.0</em>
-    </div>
-    <div class="nav-section">Utama</div>
-    <div class="nav-item active">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      Dashboard
-    </div>
-    <div class="nav-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-      Investasi
-    </div>
-    <div class="nav-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      Proteksi Aset
-    </div>
-    <div class="nav-section" style="margin-top:8px;">Laporan</div>
-    <div class="nav-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-      Laporan Bulanan
-      <span class="nav-badge">Baru</span>
-    </div>
-    <div class="nav-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M5.93 19.07a10 10 0 0 1 0-14.14"/></svg>
-      Pengaturan
+    <div class="card">
+        <h3>Saldo Net Saat Ini</h3>
+        <div class="val" id="saldo-net">Rp 0</div>
     </div>
 
-    <div class="sidebar-footer">
-      <div class="user-chip" onclick="logout()">
-        <div class="user-avatar">U</div>
-        <div class="user-info">
-          <div class="user-name">Pengguna</div>
-          <div class="user-role">Klik untuk keluar</div>
+    <div class="grid">
+        <!-- FORM TAMBAH MANUAL -->
+        <div class="card">
+            <h4>➕ Tambah Transaksi</h4>
+            <form id="form-transaksi">
+                <input type="date" id="tanggal" required>
+                <input type="text" id="deskripsi" placeholder="Keterangan (Makan, Gaji, dll)" required>
+                <input type="number" id="jumlah" placeholder="Jumlah (Contoh: 50000)" required>
+                <select id="kategori">
+                    <option value="saldo_net">Pemasukan (Masuk ke Saldo)</option>
+                    <option value="pengeluaran">Pengeluaran</option>
+                    <option value="investasi">Investasi</option>
+                    <option value="dana_darurat">Dana Darurat</option>
+                </select>
+                <button type="submit" id="btn-simpan">Simpan Transaksi</button>
+            </form>
         </div>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      </div>
-    </div>
-  </aside>
 
-  <!-- Main Content -->
-  <main>
-    <!-- Top Bar -->
-    <div class="topbar fade-in">
-      <div class="topbar-left">
-        <h1>Ikhtisar Keuangan</h1>
-        <p id="greeting">Memuat data...</p>
-      </div>
-      <div class="topbar-right">
-        <button class="btn btn-ghost" onclick="refresh()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-          Refresh
-        </button>
-        <button class="btn btn-ghost" onclick="printReport()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-          Cetak
-        </button>
-      </div>
+        <!-- CHART -->
+        <div class="card">
+            <h4>📊 Alokasi Dana</h4>
+            <canvas id="chart"></canvas>
+        </div>
     </div>
 
-    <!-- Stats -->
-    <div class="stats-row">
-      <div class="stat-card green fade-in stagger-1">
-        <div class="stat-icon green">💰</div>
-        <div class="stat-label">Total Aset</div>
-        <div class="stat-value green" id="v-asset">Rp 0</div>
-        <div class="stat-trend">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
-          <span id="v-asset-trend">Saldo aktif</span>
-        </div>
-      </div>
-      <div class="stat-card red fade-in stagger-2">
-        <div class="stat-icon red">📉</div>
-        <div class="stat-label">Pengeluaran Bulan Ini</div>
-        <div class="stat-value red" id="v-exp">Rp 0</div>
-        <div class="stat-trend">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 9 12 15 6 9"/></svg>
-          <span>Total dikurangi dari aset</span>
-        </div>
-      </div>
-      <div class="stat-card blue fade-in stagger-3">
-        <div class="stat-icon blue">⚖️</div>
-        <div class="stat-label">Likuiditas Bersih</div>
-        <div class="stat-value blue" id="v-net">Rp 0</div>
-        <div class="stat-trend">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          <span>Pemasukan − Pengeluaran</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Gauge + Chart -->
-    <div class="grid2 fade-in stagger-3">
-      <div class="card">
-        <div class="card-title">Dana Darurat</div>
-        <div class="fund-row">
-          <div class="gauge-wrap">
-            <canvas id="gaugeChart"></canvas>
-            <div class="gauge-center">
-              <div class="gauge-pct" id="perc-text">0%</div>
-              <div class="gauge-sub">tercapai</div>
-            </div>
-          </div>
-          <div class="fund-info">
-            <div class="stat-label">Target</div>
-            <div class="fund-target">Rp 20.000.000</div>
-            <div class="fund-remaining" id="target-msg">Mengumpulkan data...</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Tren Portofolio — 30 Hari Terakhir</div>
-        <div class="chart-wrap">
-          <canvas id="lineChart"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <!-- Input Form -->
-    <div class="card fade-in stagger-4" style="margin-bottom:24px;">
-      <div class="card-title">Input Transaksi Baru</div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Kategori</label>
-          <select class="form-control" id="f-kat">
-            <option value="pemasukan">💚 Pemasukan</option>
-            <option value="pengeluaran">🔴 Pengeluaran</option>
-            <option value="investasi">🔵 Investasi</option>
-            <option value="dana_darurat">🟡 Dana Darurat</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Nama Transaksi</label>
-          <input type="text" class="form-control" id="f-desc" placeholder="mis. Gaji, Makan siang, Beli saham..." />
-        </div>
-        <div class="form-group">
-          <label>Nominal (Rp)</label>
-          <input type="number" class="form-control" id="f-amt" placeholder="0" min="1" />
-        </div>
-        <button class="btn btn-primary" id="submitBtn" onclick="simpan()" style="height:44px; align-self:end;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Catat
-        </button>
-      </div>
-    </div>
-
-    <!-- Transaction Table -->
-    <div class="card table-card fade-in stagger-4">
-      <div class="table-header">
-        <div class="card-title">Log Transaksi</div>
-        <div class="table-count" id="txCount">0 transaksi</div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Tanggal</th>
-              <th>Kategori</th>
-              <th>Deskripsi</th>
-              <th style="text-align:right;">Nominal</th>
-              <th style="text-align:center;">Aksi</th>
-            </tr>
-          </thead>
-          <tbody id="tableBody">
-            <tr><td colspan="5">
-              <div class="empty-state">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/></svg>
-                <p>Belum ada transaksi. Mulai dengan input di atas.</p>
-              </div>
-            </td></tr>
-          </tbody>
+    <!-- TABEL RIWAYAT -->
+    <div class="card">
+        <h4>📝 Riwayat Transaksi</h4>
+        <table id="table-riwayat">
+            <thead>
+                <tr>
+                    <th>Tgl</th>
+                    <th>Kategori</th>
+                    <th>Deskripsi</th>
+                    <th>Jumlah</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data akan muncul di sini -->
+            </tbody>
         </table>
-      </div>
     </div>
-  </main>
-</div>
 
-<script>
-// ═══════════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════════
-const API = "https://finance-worker.ebeneserpinem6.workers.dev";
-const TARGET_DANA = 20_000_000;
-const CORRECT_PIN = "12345";
-let gaugeChart = null, lineChart = null;
+    <script>
+        // GANTI URL INI DENGAN URL WORKER ANDA
+        const API_URL = "https://finance-worker.ebeneserpinem6.workers.dev";
+        let myChart;
 
-// ═══════════════════════════════════════════
-// PIN AUTH
-// ═══════════════════════════════════════════
-let pinBuffer = "";
+        // --- FUNGSI MENGAMBIL DATA ---
+        async function refreshData() {
+            try {
+                // 1. Ambil data ringkasan
+                const resData = await fetch(API_URL + "/api/data");
+                const d = await resData.json();
+                
+                document.getElementById("saldo-net").innerText = "Rp " + d.saldo_net_display.toLocaleString('id-ID');
 
-function pinPress(d) {
-  if (pinBuffer.length >= 5) return;
-  pinBuffer += d;
-  updatePinUI();
-  if (pinBuffer.length === 5) setTimeout(pinSubmit, 300);
-}
-function pinClear() {
-  pinBuffer = pinBuffer.slice(0, -1);
-  updatePinUI();
-  document.getElementById("pinError").textContent = "";
-}
-function updatePinUI() {
-  for (let i = 0; i < 5; i++) {
-    const el = document.getElementById("d" + i);
-    el.classList.toggle("filled", i < pinBuffer.length);
-  }
-}
-function pinSubmit() {
-  if (pinBuffer === CORRECT_PIN) {
-    localStorage.setItem("sv_token", "active");
-    document.getElementById("auth-screen").style.display = "none";
-    document.getElementById("app").style.display = "flex";
-    initApp();
-  } else {
-    document.getElementById("pinError").textContent = "PIN salah. Coba lagi.";
-    pinBuffer = "";
-    updatePinUI();
-    const numpad = document.getElementById("numpad");
-    numpad.style.animation = "none";
-    numpad.offsetHeight;
-    numpad.style.animation = "shake 0.4s";
-  }
-}
-// shake keyframes
-const style = document.createElement("style");
-style.textContent = `@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}`;
-document.head.appendChild(style);
+                // Update Chart
+                const ctx = document.getElementById('chart').getContext('2d');
+                if (myChart) myChart.destroy();
+                myChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Darurat', 'Investasi', 'Keluar'],
+                        datasets: [{
+                            data: [d.dana_darurat, d.investasi, d.pengeluaran],
+                            backgroundColor: ['#facc15', '#22c55e', '#ef4444']
+                        }]
+                    },
+                    options: { plugins: { legend: { labels: { color: 'white' } } } }
+                });
 
-function logout() {
-  if (confirm("Kunci vault dan keluar?")) {
-    localStorage.removeItem("sv_token");
-    location.reload();
-  }
-}
-function checkAuth() {
-  if (localStorage.getItem("sv_token") === "active") {
-    document.getElementById("auth-screen").style.display = "none";
-    document.getElementById("app").style.display = "flex";
-    initApp();
-  }
-}
+                // 2. Ambil data transaksi (tabel)
+                const resList = await fetch(API_URL + "/api/transaksi");
+                const list = await resList.json();
+                const tbody = document.querySelector("#table-riwayat tbody");
+                tbody.innerHTML = "";
 
-// ═══════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════
-function initApp() {
-  const now = new Date();
-  const h = now.getHours();
-  const salam = h < 11 ? "Selamat pagi" : h < 15 ? "Selamat siang" : h < 19 ? "Selamat sore" : "Selamat malam";
-  document.getElementById("greeting").textContent = `${salam} — ${now.toLocaleDateString("id-ID", { weekday:"long", day:"numeric", month:"long", year:"numeric" })}`;
-  refresh();
-}
-
-// ═══════════════════════════════════════════
-// FETCH & REFRESH
-// ═══════════════════════════════════════════
-async function refresh() {
-  try {
-    const res = await fetch(API + "/api/data");
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    const d = await res.json();
-    animateNumber("v-asset", d.totalAsset);
-    animateNumber("v-exp", d.pengeluaran);
-    animateNumber("v-net", d.saldoBersih);
-    document.getElementById("v-asset-trend").textContent =
-      d.saldoBersih >= 0 ? "Saldo positif ✓" : "Perhatian: saldo negatif";
-    updateGauge(d.dana_darurat || 0);
-    await loadTable();
-  } catch (e) {
-    console.error("Refresh error:", e);
-    toast("Gagal memuat data: " + e.message, "error");
-  }
-}
-
-// ═══════════════════════════════════════════
-// NUMBER ANIMATION
-// ═══════════════════════════════════════════
-function animateNumber(id, endValue) {
-  const el = document.getElementById(id);
-  const start = 0;
-  const duration = 1200;
-  let startTime = null;
-  function step(ts) {
-    if (!startTime) startTime = ts;
-    const progress = Math.min((ts - startTime) / duration, 1);
-    const ease = 1 - Math.pow(1 - progress, 3);
-    el.textContent = "Rp " + Math.floor(ease * endValue).toLocaleString("id-ID");
-    if (progress < 1) requestAnimationFrame(step);
-  }
-  requestAnimationFrame(step);
-}
-
-// ═══════════════════════════════════════════
-// GAUGE CHART
-// ═══════════════════════════════════════════
-function updateGauge(val) {
-  const pct = Math.min(Math.round((val / TARGET_DANA) * 100), 100);
-  document.getElementById("perc-text").textContent = pct + "%";
-  const sisa = TARGET_DANA - val;
-  const msgEl = document.getElementById("target-msg");
-  if (val >= TARGET_DANA) {
-    msgEl.innerHTML = `<strong style="color:var(--green)">🎉 Target tercapai!</strong> Dana darurat Anda aman.`;
-  } else {
-    msgEl.innerHTML = `Butuh <strong>Rp ${sisa.toLocaleString("id-ID")}</strong> lagi untuk mencapai target dana darurat 6 bulan.`;
-  }
-
-  const color = pct >= 100 ? "#10b981" : pct >= 60 ? "#f59e0b" : "#6366f1";
-  const ctx = document.getElementById("gaugeChart");
-  if (gaugeChart) gaugeChart.destroy();
-  gaugeChart = new Chart(ctx, {
-    type: "doughnut",
-    data: {
-      datasets: [{
-        data: [val, Math.max(0, TARGET_DANA - val)],
-        backgroundColor: [color, "rgba(255,255,255,0.05)"],
-        borderWidth: 0,
-        borderRadius: 6,
-      }]
-    },
-    options: {
-      cutout: "82%",
-      plugins: { legend: { display: false }, tooltip: { enabled: false } },
-      animation: { animateRotate: true, duration: 1000 }
-    }
-  });
-}
-
-// ═══════════════════════════════════════════
-// TABLE
-// ═══════════════════════════════════════════
-async function loadTable() {
-  try {
-    const res = await fetch(API + "/api/transaksi");
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    const list = await res.json();
-    list.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
-    document.getElementById("txCount").textContent = list.length + " transaksi";
-
-    if (list.length === 0) {
-      document.getElementById("tableBody").innerHTML = `
-        <tr><td colspan="5">
-          <div class="empty-state">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/></svg>
-            <p>Belum ada transaksi. Mulai dengan input di atas.</p>
-          </div>
-        </td></tr>`;
-    } else {
-      const pillMap = {
-        pemasukan: "pill-in",
-        pengeluaran: "pill-out",
-        investasi: "pill-invest",
-        dana_darurat: "pill-dana"
-      };
-      const labelMap = {
-        pemasukan: "Pemasukan",
-        pengeluaran: "Pengeluaran",
-        investasi: "Investasi",
-        dana_darurat: "Dana Darurat"
-      };
-      document.getElementById("tableBody").innerHTML = list.slice(0, 20).map(t => {
-        const isOut = t.kategori === "pengeluaran";
-        const pillClass = pillMap[t.kategori] || "pill-in";
-        const label = labelMap[t.kategori] || t.kategori;
-        const tanggal = new Date(t.tanggal);
-        const tgl = isNaN(tanggal) ? t.tanggal : tanggal.toLocaleDateString("id-ID", { day:"2-digit", month:"short", year:"2-digit" });
-        return `<tr>
-          <td class="td-date">${tgl}</td>
-          <td><span class="pill ${pillClass}">${label}</span></td>
-          <td class="td-desc">${escapeHtml(t.deskripsi)}</td>
-          <td class="td-amount" style="color:${isOut ? "var(--red)" : "var(--green)"}">
-            ${isOut ? "−" : "+"} Rp ${Number(t.jumlah).toLocaleString("id-ID")}
-          </td>
-          <td class="td-action">
-            <button class="del-btn" onclick="hapus('${escapeHtml(String(t.id))}')" title="Hapus">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-            </button>
-          </td>
-        </tr>`;
-      }).join("");
-    }
-
-    updateLine(list);
-  } catch (e) {
-    console.error("loadTable error:", e);
-    toast("Gagal memuat transaksi.", "error");
-  }
-}
-
-// ═══════════════════════════════════════════
-// LINE CHART
-// ═══════════════════════════════════════════
-function updateLine(data) {
-  const ctx = document.getElementById("lineChart");
-  if (lineChart) lineChart.destroy();
-  const sorted = [...data].sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
-  let bal = 0;
-  const pts = sorted.map(t => {
-    bal += t.kategori === "pengeluaran" ? -t.jumlah : t.jumlah;
-    return bal;
-  });
-  if (pts.length === 0) pts.push(0);
-  const positive = pts[pts.length - 1] >= 0;
-
-  lineChart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: sorted.map(() => ""),
-      datasets: [{
-        data: pts,
-        borderColor: positive ? "#10b981" : "#f43f5e",
-        borderWidth: 2.5,
-        pointRadius: 0,
-        tension: 0.4,
-        fill: true,
-        backgroundColor: (ctx) => {
-          const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 160);
-          g.addColorStop(0, positive ? "rgba(16,185,129,0.18)" : "rgba(244,63,94,0.18)");
-          g.addColorStop(1, "rgba(0,0,0,0)");
-          return g;
+                list.forEach(t => {
+                    const row = `<tr>
+                        <td>${t.tanggal}</td>
+                        <td>${t.kategori}</td>
+                        <td>${t.deskripsi}</td>
+                        <td>Rp ${t.jumlah.toLocaleString('id-ID')}</td>
+                        <td><button class="btn-delete" onclick="hapusData(${t.id})">Hapus</button></td>
+                    </tr>`;
+                    tbody.innerHTML += row;
+                });
+            } catch (err) {
+                console.error("Gagal load data:", err);
+            }
         }
-      }]
-    },
-    options: {
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: {
-        enabled: true,
-        callbacks: {
-          label: ctx => "Rp " + ctx.parsed.y.toLocaleString("id-ID")
+
+        // --- FUNGSI TAMBAH DATA ---
+        document.getElementById("form-transaksi").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById("btn-simpan");
+            btn.innerText = "Menyimpan...";
+            btn.disabled = true;
+
+            const payload = {
+                tanggal: document.getElementById("tanggal").value,
+                deskripsi: document.getElementById("deskripsi").value,
+                jumlah: parseInt(document.getElementById("jumlah").value),
+                kategori: document.getElementById("kategori").value,
+                email_id: "user@test.com", // Default
+                no_rekening: "12345" // Default
+            };
+
+            try {
+                await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                document.getElementById("form-transaksi").reset();
+                await refreshData(); // Refresh tampilan
+            } catch (err) {
+                alert("Gagal menyimpan data");
+            } finally {
+                btn.innerText = "Simpan Transaksi";
+                btn.disabled = false;
+            }
+        });
+
+        // --- FUNGSI HAPUS DATA ---
+        async function hapusData(id) {
+            if (confirm("Apakah Anda yakin ingin menghapus data ini?")) {
+                try {
+                    await fetch(`${API_URL}?id=${id}`, { method: "DELETE" });
+                    await refreshData(); // Refresh tampilan
+                } catch (err) {
+                    alert("Gagal menghapus data");
+                }
+            }
         }
-      }},
-      scales: {
-        x: { display: false },
-        y: { display: false }
-      },
-      animation: { duration: 1000 }
-    }
-  });
-}
 
-// ═══════════════════════════════════════════
-// SIMPAN TRANSAKSI — BUG FIXED
-// ═══════════════════════════════════════════
-async function simpan() {
-  const desc = document.getElementById("f-desc").value.trim();
-  const amtRaw = document.getElementById("f-amt").value;
-  const kategori = document.getElementById("f-kat").value;
-
-  // Validasi dengan feedback
-  if (!desc) {
-    toast("Nama transaksi tidak boleh kosong.", "error");
-    document.getElementById("f-desc").focus();
-    return;
-  }
-  if (!amtRaw || parseFloat(amtRaw) <= 0 || isNaN(parseFloat(amtRaw))) {
-    toast("Masukkan nominal yang valid (lebih dari 0).", "error");
-    document.getElementById("f-amt").focus();
-    return;
-  }
-
-  const btn = document.getElementById("submitBtn");
-  btn.disabled = true;
-  btn.innerHTML = `<span class="spinner"></span> Menyimpan...`;
-
-  try {
-    const res = await fetch(API + "/api/tambah", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"  // ← BUG FIX #1: header wajib ada
-      },
-      body: JSON.stringify({
-        deskripsi: desc,
-        jumlah: parseFloat(amtRaw),
-        kategori: kategori,
-        email_id: "user@mail.com"
-      })
-    });
-
-    if (!res.ok) throw new Error("Server merespons dengan status " + res.status);
-
-    // Reset form
-    document.getElementById("f-desc").value = "";
-    document.getElementById("f-amt").value = "";
-    toast("Transaksi berhasil dicatat! 🎉", "success");
-    await refresh();
-  } catch (e) {
-    console.error("Simpan error:", e);
-    toast("Gagal menyimpan: " + e.message, "error");
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Catat`;
-  }
-}
-
-// ═══════════════════════════════════════════
-// HAPUS TRANSAKSI — BUG FIXED
-// ═══════════════════════════════════════════
-async function hapus(id) {
-  if (!confirm("Hapus transaksi ini?")) return;
-  try {
-    const res = await fetch(`${API}/api/hapus?id=${encodeURIComponent(id)}`, {
-      method: "DELETE"   // ← BUG FIX #2: pastikan method DELETE terkirim
-    });
-    if (!res.ok) throw new Error("Server merespons dengan status " + res.status);
-    toast("Transaksi dihapus.", "info");
-    await refresh();
-  } catch (e) {
-    console.error("Hapus error:", e);
-    toast("Gagal menghapus: " + e.message, "error");
-  }
-}
-
-// ═══════════════════════════════════════════
-// TOAST NOTIFICATION
-// ═══════════════════════════════════════════
-function toast(msg, type = "info", duration = 3500) {
-  const wrap = document.getElementById("toastWrap");
-  const el = document.createElement("div");
-  el.className = `toast ${type}`;
-  const icons = { success: "✓", error: "✕", info: "ℹ" };
-  el.innerHTML = `<span style="font-weight:700">${icons[type] || "·"}</span> ${msg}`;
-  wrap.appendChild(el);
-  setTimeout(() => {
-    el.style.animation = "toastOut 0.3s forwards";
-    setTimeout(() => el.remove(), 300);
-  }, duration);
-}
-
-// ═══════════════════════════════════════════
-// PRINT
-// ═══════════════════════════════════════════
-function printReport() {
-  toast("Membuka dialog cetak...", "info");
-  setTimeout(() => window.print(), 500);
-}
-
-// ═══════════════════════════════════════════
-// UTILS
-// ═══════════════════════════════════════════
-function escapeHtml(s) {
-  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-}
-
-// Enter key on inputs
-document.addEventListener("DOMContentLoaded", () => {
-  ["f-desc","f-amt"].forEach(id => {
-    document.getElementById(id)?.addEventListener("keydown", e => {
-      if (e.key === "Enter") simpan();
-    });
-  });
-  checkAuth();
-});
-</script>
+        // Load data pertama kali saat web dibuka
+        refreshData();
+    </script>
 </body>
 </html>
