@@ -632,7 +632,7 @@ tbody td { padding: 14px 24px; font-size: 13px; vertical-align: middle; }
         <div class="form-group">
           <label>Kategori</label>
           <select class="form-control" id="f-kat">
-            <option value="saldo_net">💚 Saldo</option>
+            <option value="pemasukan">💚 Pemasukan</option>
             <option value="pengeluaran">🔴 Pengeluaran</option>
             <option value="investasi">🔵 Investasi</option>
             <option value="dana_darurat">🟡 Dana Darurat</option>
@@ -856,18 +856,17 @@ async function loadTable() {
         </td></tr>`;
     } else {
       const pillMap = {
-  saldo_net: "pill-in",
-  pengeluaran: "pill-out",
-  investasi: "pill-invest",
-  dana_darurat: "pill-dana"
-};
-
-const labelMap = {
-  saldo_net: "Saldo",
-  pengeluaran: "Pengeluaran",
-  investasi: "Investasi",
-  dana_darurat: "Dana Darurat"
-};
+        pemasukan: "pill-in",
+        pengeluaran: "pill-out",
+        investasi: "pill-invest",
+        dana_darurat: "pill-dana"
+      };
+      const labelMap = {
+        pemasukan: "Pemasukan",
+        pengeluaran: "Pengeluaran",
+        investasi: "Investasi",
+        dana_darurat: "Dana Darurat"
+      };
       document.getElementById("tableBody").innerHTML = list.slice(0, 20).map(t => {
         const isOut = t.kategori === "pengeluaran";
         const pillClass = pillMap[t.kategori] || "pill-in";
