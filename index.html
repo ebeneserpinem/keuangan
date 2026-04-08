@@ -6,174 +6,139 @@
     <title>Finance Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; color: white; padding: 20px; max-width: 900px; margin: auto; }
-        .card { background: #1e293b; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #334155; }
+        /* TAMPILAN ASLI ANDA */
+        body { font-family: sans-serif; background: #0f172a; color: white; padding: 20px; max-width: 800px; margin: auto; }
+        .card { background: #1e293b; padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center; border: 1px solid #334155; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .val { color: #38bdf8; font-size: 2.5em; font-weight: bold; margin: 10px 0; text-align: center; }
-        
-        /* Form Style */
-        input, select, button { width: 100%; padding: 10px; margin: 8px 0; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
-        button { background: #38bdf8; color: #0f172a; font-weight: bold; border: none; cursor: pointer; transition: 0.3s; }
-        button:hover { background: #7dd3fc; }
-        
-        /* Table Style */
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9em; }
-        th, td { padding: 12px; border-bottom: 1px solid #334155; text-align: left; }
-        th { background: #1e293b; }
-        .btn-delete { background: #ef4444; color: white; padding: 5px 10px; font-size: 0.7em; width: auto; }
-
+        .val { color: #38bdf8; font-size: 2.2em; font-weight: bold; margin: 10px 0; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.8em; margin-top: 10px; }
+        th, td { padding: 8px; border-bottom: 1px solid #334155; text-align: left; }
         @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+
+        /* Tambahan sedikit agar input rapi di dalam tema asli */
+        input, select, button { 
+            background: #0f172a; color: white; border: 1px solid #334155; 
+            padding: 5px; border-radius: 4px; font-size: 0.8em;
+        }
+        button { cursor: pointer; background: #38bdf8; color: #0f172a; font-weight: bold; }
+        .btn-del { background: none; border: none; color: #ef4444; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
-
-    <h2 style="text-align: center;">💰 Personal Finance</h2>
-
+    <!-- SALDO -->
     <div class="card">
-        <h3>Saldo Net Saat Ini</h3>
+        <h3>💰 Saldo Net Saat Ini</h3>
         <div class="val" id="saldo-net">Rp 0</div>
+        
+        <!-- FORM TAMBAH (Diselipkan di card saldo agar UI tetap bersih) -->
+        <div style="margin-top: 15px; display: flex; gap: 5px; justify-content: center; flex-wrap: wrap;">
+            <input type="text" id="desc" placeholder="Ket" style="width: 80px;">
+            <input type="number" id="amount" placeholder="Rp" style="width: 80px;">
+            <select id="cat">
+                <option value="saldo_net">Masuk</option>
+                <option value="pengeluaran">Keluar</option>
+                <option value="investasi">Investasi</option>
+                <option value="dana_darurat">Darurat</option>
+            </select>
+            <button onclick="tambah()">+</button>
+        </div>
     </div>
 
     <div class="grid">
-        <!-- FORM TAMBAH MANUAL -->
-        <div class="card">
-            <h4>➕ Tambah Transaksi</h4>
-            <form id="form-transaksi">
-                <input type="date" id="tanggal" required>
-                <input type="text" id="deskripsi" placeholder="Keterangan (Makan, Gaji, dll)" required>
-                <input type="number" id="jumlah" placeholder="Jumlah (Contoh: 50000)" required>
-                <select id="kategori">
-                    <option value="saldo_net">Pemasukan (Masuk ke Saldo)</option>
-                    <option value="pengeluaran">Pengeluaran</option>
-                    <option value="investasi">Investasi</option>
-                    <option value="dana_darurat">Dana Darurat</option>
-                </select>
-                <button type="submit" id="btn-simpan">Simpan Transaksi</button>
-            </form>
-        </div>
-
         <!-- CHART -->
         <div class="card">
             <h4>📊 Alokasi Dana</h4>
             <canvas id="chart"></canvas>
         </div>
-    </div>
 
-    <!-- TABEL RIWAYAT -->
-    <div class="card">
-        <h4>📝 Riwayat Transaksi</h4>
-        <table id="table-riwayat">
-            <thead>
-                <tr>
-                    <th>Tgl</th>
-                    <th>Kategori</th>
-                    <th>Deskripsi</th>
-                    <th>Jumlah</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Data akan muncul di sini -->
-            </tbody>
-        </table>
+        <!-- TABEL RIWAYAT -->
+        <div class="card">
+            <h4>📝 Riwayat</h4>
+            <table id="table">
+                <thead>
+                    <tr>
+                        <th>Kategori</th>
+                        <th>Jumlah</th>
+                        <th></th> 
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
     </div>
 
     <script>
-        // GANTI URL INI DENGAN URL WORKER ANDA
-        const API_URL = "https://finance-worker.ebeneserpinem6.workers.dev";
-        let myChart;
+        const API = "https://finance-worker.ebeneserpinem6.workers.dev";
+        let chartObj;
 
-        // --- FUNGSI MENGAMBIL DATA ---
-        async function refreshData() {
-            try {
-                // 1. Ambil data ringkasan
-                const resData = await fetch(API_URL + "/api/data");
-                const d = await resData.json();
-                
-                document.getElementById("saldo-net").innerText = "Rp " + d.saldo_net_display.toLocaleString('id-ID');
+        // FUNGSI LOAD DATA
+        async function load() {
+            const r = await fetch(API + "/api/data");
+            const d = await r.json();
+            document.getElementById("saldo-net").innerText = "Rp " + d.saldo_net_display.toLocaleString('id-ID');
+            
+            const ctx = document.getElementById("chart").getContext("2d");
+            if(chartObj) chartObj.destroy();
+            chartObj = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Darurat', 'Investasi', 'Keluar'],
+                    datasets: [{ 
+                        data: [d.dana_darurat, d.investasi, d.pengeluaran], 
+                        backgroundColor: ['#facc15', '#22c55e', '#ef4444'] 
+                    }]
+                },
+                options: { plugins: { legend: { display: false } } } // Agar ringkas
+            });
 
-                // Update Chart
-                const ctx = document.getElementById('chart').getContext('2d');
-                if (myChart) myChart.destroy();
-                myChart = new Chart(ctx, {
-                    type: 'pie',
-                    data: {
-                        labels: ['Darurat', 'Investasi', 'Keluar'],
-                        datasets: [{
-                            data: [d.dana_darurat, d.investasi, d.pengeluaran],
-                            backgroundColor: ['#facc15', '#22c55e', '#ef4444']
-                        }]
-                    },
-                    options: { plugins: { legend: { labels: { color: 'white' } } } }
-                });
+            const rT = await fetch(API + "/api/transaksi");
+            const list = await rT.json();
+            // Menampilkan kategori, jumlah, dan tombol hapus (X)
+            document.querySelector("#table tbody").innerHTML = list.map(t => `
+                <tr>
+                    <td>${t.kategori}</td>
+                    <td>Rp ${t.jumlah.toLocaleString('id-ID')}</td>
+                    <td><button class="btn-del" onclick="hapus(${t.id})">✕</button></td>
+                </tr>
+            `).join("");
+        }
 
-                // 2. Ambil data transaksi (tabel)
-                const resList = await fetch(API_URL + "/api/transaksi");
-                const list = await resList.json();
-                const tbody = document.querySelector("#table-riwayat tbody");
-                tbody.innerHTML = "";
+        // FUNGSI TAMBAH DATA
+        async function tambah() {
+            const desc = document.getElementById("desc").value;
+            const amount = document.getElementById("amount").value;
+            const cat = document.getElementById("cat").value;
 
-                list.forEach(t => {
-                    const row = `<tr>
-                        <td>${t.tanggal}</td>
-                        <td>${t.kategori}</td>
-                        <td>${t.deskripsi}</td>
-                        <td>Rp ${t.jumlah.toLocaleString('id-ID')}</td>
-                        <td><button class="btn-delete" onclick="hapusData(${t.id})">Hapus</button></td>
-                    </tr>`;
-                    tbody.innerHTML += row;
-                });
-            } catch (err) {
-                console.error("Gagal load data:", err);
+            if(!amount) return alert("Isi jumlah!");
+
+            await fetch(API, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    tanggal: new Date().toISOString().split('T')[0],
+                    deskripsi: desc || "Manual",
+                    jumlah: parseInt(amount),
+                    kategori: cat,
+                    email_id: "user@test.com",
+                    no_rekening: "123"
+                })
+            });
+
+            document.getElementById("amount").value = "";
+            document.getElementById("desc").value = "";
+            load();
+        }
+
+        // FUNGSI HAPUS DATA
+        async function hapus(id) {
+            if(confirm("Hapus transaksi ini?")) {
+                await fetch(`${API}?id=${id}`, { method: "DELETE" });
+                load();
             }
         }
 
-        // --- FUNGSI TAMBAH DATA ---
-        document.getElementById("form-transaksi").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById("btn-simpan");
-            btn.innerText = "Menyimpan...";
-            btn.disabled = true;
-
-            const payload = {
-                tanggal: document.getElementById("tanggal").value,
-                deskripsi: document.getElementById("deskripsi").value,
-                jumlah: parseInt(document.getElementById("jumlah").value),
-                kategori: document.getElementById("kategori").value,
-                email_id: "user@test.com", // Default
-                no_rekening: "12345" // Default
-            };
-
-            try {
-                await fetch(API_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload)
-                });
-                document.getElementById("form-transaksi").reset();
-                await refreshData(); // Refresh tampilan
-            } catch (err) {
-                alert("Gagal menyimpan data");
-            } finally {
-                btn.innerText = "Simpan Transaksi";
-                btn.disabled = false;
-            }
-        });
-
-        // --- FUNGSI HAPUS DATA ---
-        async function hapusData(id) {
-            if (confirm("Apakah Anda yakin ingin menghapus data ini?")) {
-                try {
-                    await fetch(`${API_URL}?id=${id}`, { method: "DELETE" });
-                    await refreshData(); // Refresh tampilan
-                } catch (err) {
-                    alert("Gagal menghapus data");
-                }
-            }
-        }
-
-        // Load data pertama kali saat web dibuka
-        refreshData();
+        load(); 
+        setInterval(load, 30000); // Refresh tiap 30 detik saja agar tidak berat saat mengetik
     </script>
 </body>
 </html>
