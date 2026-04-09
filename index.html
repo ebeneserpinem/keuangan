@@ -68,7 +68,7 @@ body::before {
 
 @keyframes driftGlow { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(20px,-20px) scale(1.05)} }
 
-/* ─── LOGIN SCREEN ─── */
+/* ─── AUTH SCREEN ─── */
 #auth-screen {
   position: fixed; inset: 0; z-index: 1000;
   background: var(--bg);
@@ -129,11 +129,6 @@ body::before {
 .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
 .nav-item:hover { background: var(--surface-hover); color: var(--text1); }
 .nav-item.active { background: rgba(99,102,241,0.12); color: var(--accent2); border-color: rgba(99,102,241,0.2); }
-.nav-badge {
-  margin-left: auto; font-size: 10px; font-weight: 600;
-  background: var(--accent); color: white;
-  padding: 2px 7px; border-radius: 99px;
-}
 
 .sidebar-footer {
   margin-top: auto;
@@ -289,7 +284,7 @@ tbody td { padding: 14px 24px; font-size: 13px; border-bottom: 1px solid var(--b
 <div id="auth-screen">
   <div class="auth-box">
     <div class="auth-logo"><span>S</span>entinel<span>.</span></div>
-    <div class="auth-sub">Akses sistem manajemen keuangan Sentinel Vault.</div>
+    <div class="auth-sub">Manajemen Keuangan Terenkripsi</div>
     <div class="login-form">
       <div class="form-group">
         <label>Username</label>
@@ -299,7 +294,7 @@ tbody td { padding: 14px 24px; font-size: 13px; border-bottom: 1px solid var(--b
         <label>Password</label>
         <input type="password" id="login-pass" class="form-control" placeholder="••••••••">
       </div>
-      <button class="btn btn-primary" onclick="handleLogin()" style="width:100%; margin-top:10px; height:45px;">Masuk ke Dashboard</button>
+      <button class="btn btn-primary" onclick="handleLogin()" style="width:100%; margin-top:10px; height:45px;">Masuk Vault</button>
       <div id="login-error" style="color:var(--red); font-size:12px; text-align:center; height:15px; margin-top:5px;"></div>
     </div>
   </div>
@@ -311,13 +306,11 @@ tbody td { padding: 14px 24px; font-size: 13px; border-bottom: 1px solid var(--b
     <div class="sidebar-logo"><span>S</span>entinel<span>.</span><em>Financial Vault v2.5</em></div>
     <div class="nav-section">Utama</div>
     <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</div>
-    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>Investasi</div>
-    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Proteksi</div>
     <div class="sidebar-footer">
       <div class="user-chip" onclick="logout()">
-        <div class="user-avatar" id="userInitial">A</div>
+        <div class="user-avatar">A</div>
         <div class="user-info">
-          <div class="user-name" id="userNameDisplay">Admin</div>
+          <div class="user-name">Admin User</div>
           <div class="user-role">Klik untuk Keluar</div>
         </div>
       </div>
@@ -327,11 +320,10 @@ tbody td { padding: 14px 24px; font-size: 13px; border-bottom: 1px solid var(--b
   <main>
     <div class="topbar">
       <div class="topbar-left">
-        <h1>Dashboard Keuangan</h1>
+        <h1>Ikhtisar Keuangan</h1>
         <p id="greeting">Memuat...</p>
       </div>
       <div class="topbar-right">
-        <!-- FILTER DATA -->
         <div class="filter-container">
           <select id="filterMonth" class="filter-select" onchange="refresh()">
             <option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option>
@@ -353,7 +345,7 @@ tbody td { padding: 14px 24px; font-size: 13px; border-bottom: 1px solid var(--b
       </div>
       <div class="stat-card">
         <div class="stat-icon red">📉</div>
-        <div class="stat-label">Pengeluaran</div>
+        <div class="stat-label">Total Pengeluaran</div>
         <div class="stat-value red" id="v-exp">Rp 0</div>
       </div>
       <div class="stat-card">
@@ -372,8 +364,8 @@ tbody td { padding: 14px 24px; font-size: 13px; border-bottom: 1px solid var(--b
             <div class="gauge-center"><div class="gauge-pct" id="perc-text">0%</div></div>
           </div>
           <div style="flex:1">
-            <div class="stat-label">Target Rp 20jt</div>
-            <div id="target-msg" style="font-size:12px; color:var(--text2); line-height:1.4">Memuat data...</div>
+            <div class="stat-label">Target Dana Rp 20jt</div>
+            <div id="target-msg" style="font-size:12px; color:var(--text2); line-height:1.4">Memuat...</div>
           </div>
         </div>
       </div>
@@ -387,7 +379,7 @@ tbody td { padding: 14px 24px; font-size: 13px; border-bottom: 1px solid var(--b
       <div class="card-title">Input Transaksi</div>
       <div class="form-row">
         <div class="form-group"><label>Kategori</label><select class="form-control" id="f-kat"><option value="pemasukan">💚 Pemasukan</option><option value="pengeluaran">🔴 Pengeluaran</option><option value="investasi">🔵 Investasi</option><option value="dana_darurat">🟡 Dana Darurat</option></select></div>
-        <div class="form-group"><label>Deskripsi</label><input type="text" class="form-control" id="f-desc" placeholder="Gaji, Makan, dll"></div>
+        <div class="form-group"><label>Deskripsi</label><input type="text" class="form-control" id="f-desc" placeholder="Gaji, Investasi, dll"></div>
         <div class="form-group"><label>Nominal</label><input type="number" class="form-control" id="f-amt" placeholder="0"></div>
         <button class="btn btn-primary" id="submitBtn" onclick="simpan()" style="height:44px">Catat</button>
       </div>
@@ -416,48 +408,35 @@ let gaugeChart = null, lineChart = null;
 function handleLogin() {
   const user = document.getElementById("login-user").value;
   const pass = document.getElementById("login-pass").value;
-  const err = document.getElementById("login-error");
-
-  // Ganti dengan kredensial yang Anda inginkan
   if (user === "admin" && pass === "sentinel123") {
     localStorage.setItem("sentinel_auth", "true");
-    localStorage.setItem("sentinel_user", user);
     initApp();
   } else {
-    err.textContent = "Username atau password salah!";
-    setTimeout(() => err.textContent = "", 3000);
+    document.getElementById("login-error").textContent = "Username/Password Salah!";
   }
 }
 
 function checkAuth() {
-  if (localStorage.getItem("sentinel_auth") === "true") {
-    initApp();
-  }
+  if (localStorage.getItem("sentinel_auth") === "true") initApp();
 }
 
 function logout() {
-  if(confirm("Keluar dari sistem?")) {
-    localStorage.removeItem("sentinel_auth");
-    location.reload();
-  }
+  localStorage.removeItem("sentinel_auth");
+  location.reload();
 }
 
 // ═══════════════════════════════════════════
-// INIT & FILTER
+// CORE LOGIC (Updated Formula)
 // ═══════════════════════════════════════════
 function initApp() {
   document.getElementById("auth-screen").style.display = "none";
   document.getElementById("app").style.display = "flex";
   
   const now = new Date();
-  // Set default filter ke bulan/tahun sekarang
   document.getElementById("filterMonth").value = now.getMonth();
-  
   const yearSelect = document.getElementById("filterYear");
-  const currentYear = now.getFullYear();
-  for(let i = currentYear; i >= currentYear - 2; i--) {
-    const opt = document.createElement("option");
-    opt.value = i; opt.textContent = i;
+  for(let i = now.getFullYear(); i >= now.getFullYear() - 2; i--) {
+    const opt = document.createElement("option"); opt.value = i; opt.textContent = i;
     yearSelect.appendChild(opt);
   }
 
@@ -465,92 +444,129 @@ function initApp() {
   refresh();
 }
 
-// ═══════════════════════════════════════════
-// REFRESH & LOAD
-// ═══════════════════════════════════════════
 async function refresh() {
   try {
     const selMonth = parseInt(document.getElementById("filterMonth").value);
     const selYear = parseInt(document.getElementById("filterYear").value);
 
-    // Ambil semua data transaksi
     const res = await fetch(API + "/api/transaksi");
     const allData = await res.json();
 
-    // FILTER DATA BERDASARKAN BULAN PILIHAN
-    const filteredData = allData.filter(t => {
+    // FILTER DATA BULANAN
+    const filtered = allData.filter(t => {
       const d = new Date(t.tanggal);
       return d.getMonth() === selMonth && d.getFullYear() === selYear;
     });
 
-    // Hitung ulang statistik dari data yang di-filter
-    let exp = 0, inc = 0, invest = 0, darurat = 0;
-    filteredData.forEach(t => {
-      if (t.kategori === 'pengeluaran') exp += t.jumlah;
-      else if (t.kategori === 'pemasukan') inc += t.jumlah;
-      else if (t.kategori === 'investasi') invest += t.jumlah;
-      else if (t.kategori === 'dana_darurat') darurat += t.jumlah;
+    // AGREGASI DATA
+    let pemasukanTotal = 0;
+    let pengeluaranMurni = 0;
+    let investasiTotal = 0;
+    let daruratTotal = 0;
+
+    filtered.forEach(t => {
+      if (t.kategori === 'pemasukan') pemasukanTotal += t.jumlah;
+      else if (t.kategori === 'pengeluaran') pengeluaranMurni += t.jumlah;
+      else if (t.kategori === 'investasi') investasiTotal += t.jumlah;
+      else if (t.kategori === 'dana_darurat') daruratTotal += t.jumlah;
     });
 
-    const net = inc - exp - invest - darurat;
-    const totalAset = inc - exp;
-
-    // Update UI
-    animateValue("v-asset", totalAset);
-    animateValue("v-exp", exp);
-    animateValue("v-net", net);
+    // ═══ PENERAPAN LOGIKA BARU ═══
     
-    updateTable(filteredData);
-    updateGauge(darurat);
-    updateLineChart(filteredData);
+    // 1. Pengeluaran = akumulasi pengeluaran + dana darurat + Investasi
+    const pengeluaranTotalDisplay = pengeluaranMurni + daruratTotal + investasiTotal;
+
+    // 2. Likuiditas Bersih = Pemasukan - Pengeluaran (Total Display)
+    const likuiditasBersih = pemasukanTotal - pengeluaranTotalDisplay;
+
+    // 3. Total Aset = Dana Darurat + Investasi
+    const totalAset = daruratTotal + investasiTotal;
+
+    // UPDATE STATS UI
+    document.getElementById("v-asset").textContent = "Rp " + totalAset.toLocaleString("id-ID");
+    document.getElementById("v-exp").textContent = "Rp " + pengeluaranTotalDisplay.toLocaleString("id-ID");
+    document.getElementById("v-net").textContent = "Rp " + likuiditasBersih.toLocaleString("id-ID");
+    
+    updateTable(filtered);
+    updateGauge(daruratTotal);
+    updateLineChart(filtered);
 
   } catch (e) {
-    toast("Gagal memuat data", "error");
+    toast("Koneksi Error", "error");
   }
 }
 
-function animateValue(id, end) {
-  const el = document.getElementById(id);
-  el.textContent = "Rp " + end.toLocaleString("id-ID");
+// ═══════════════════════════════════════════
+// UI COMPONENTS
+// ═══════════════════════════════════════════
+function updateLineChart(data) {
+  const ctx = document.getElementById("lineChart");
+  if (lineChart) lineChart.destroy();
+
+  const sorted = [...data].sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+  let cumulativeLiquidity = 0;
+  
+  const labels = sorted.map(t => new Date(t.tanggal).toLocaleDateString("id-ID", {day:'numeric', month:'short'}));
+  const values = sorted.map(t => {
+    // Trend saldo didasarkan pada Likuiditas (Masuk - (Keluar+Dar+Inv))
+    const impact = (t.kategori === 'pemasukan') ? t.jumlah : -t.jumlah;
+    cumulativeLiquidity += impact;
+    return cumulativeLiquidity;
+  });
+
+  lineChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "Likuiditas",
+        data: values,
+        borderColor: "#6366f1",
+        backgroundColor: "rgba(99,102,241,0.1)",
+        fill: true, tension: 0.4, borderWidth: 2, pointRadius: 3
+      }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { 
+            display: true, 
+            ticks: { color: "#4a5568", font: { size: 9 }, callback: v => "Rp " + (v/1000) + "k" },
+            grid: { color: "rgba(255,255,255,0.05)" }
+        },
+        x: { 
+            display: true, 
+            ticks: { color: "#4a5568", font: { size: 9 } },
+            grid: { display: false }
+        }
+      }
+    }
+  });
 }
 
-// ═══════════════════════════════════════════
-// TABLE
-// ═══════════════════════════════════════════
 function updateTable(list) {
   const body = document.getElementById("tableBody");
   document.getElementById("txCount").textContent = list.length + " item";
   
-  if (list.length === 0) {
-    body.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:40px; color:var(--text3)">Tidak ada transaksi di bulan ini.</td></tr>`;
-    return;
-  }
-
   const pillMap = { pemasukan:"pill-in", pengeluaran:"pill-out", investasi:"pill-invest", dana_darurat:"pill-dana" };
-  
   body.innerHTML = list.sort((a,b) => new Date(b.tanggal) - new Date(a.tanggal)).map(t => `
     <tr>
       <td style="font-family:var(--font-mono); font-size:12px">${new Date(t.tanggal).toLocaleDateString("id-ID")}</td>
       <td><span class="pill ${pillMap[t.kategori]}">${t.kategori.replace('_',' ')}</span></td>
       <td style="font-weight:500">${t.deskripsi}</td>
-      <td style="text-align:right; font-family:var(--font-mono); color:${t.kategori==='pengeluaran'?'var(--red)':'var(--green)'}">
-        ${t.kategori==='pengeluaran'?'-':'+'} ${t.jumlah.toLocaleString("id-ID")}
+      <td style="text-align:right; font-family:var(--font-mono); color:${t.kategori==='pemasukan'?'var(--green)':'var(--red)'}">
+        Rp ${t.jumlah.toLocaleString("id-ID")}
       </td>
-      <td style="text-align:center">
-        <button class="del-btn" onclick="hapus('${t.id}')">✕</button>
-      </td>
+      <td style="text-align:center"><button class="del-btn" onclick="hapus('${t.id}')">✕</button></td>
     </tr>
-  `).join("");
+  `).join("") || `<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text3)">Data bulan ini kosong</td></tr>`;
 }
 
-// ═══════════════════════════════════════════
-// CHARTS (IMPROVED)
-// ═══════════════════════════════════════════
 function updateGauge(val) {
   const pct = Math.min(Math.round((val / TARGET_DANA) * 100), 100);
   document.getElementById("perc-text").textContent = pct + "%";
-  document.getElementById("target-msg").textContent = val >= TARGET_DANA ? "Target Tercapai!" : `Kurang Rp ${(TARGET_DANA-val).toLocaleString()} lagi.`;
-
+  document.getElementById("target-msg").innerHTML = val >= TARGET_DANA ? "<strong>Target Tercapai!</strong>" : `Kurang Rp ${(TARGET_DANA-val).toLocaleString()} lagi.`;
   const ctx = document.getElementById("gaugeChart");
   if (gaugeChart) gaugeChart.destroy();
   gaugeChart = new Chart(ctx, {
@@ -560,65 +576,12 @@ function updateGauge(val) {
   });
 }
 
-function updateLineChart(data) {
-  const ctx = document.getElementById("lineChart");
-  if (lineChart) lineChart.destroy();
-
-  // Kelompokkan saldo harian
-  const sorted = [...data].sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
-  let runningBal = 0;
-  const chartData = sorted.map(t => {
-    runningBal += (t.kategori === 'pemasukan' ? t.jumlah : -t.jumlah);
-    return { x: new Date(t.tanggal).toLocaleDateString("id-ID", {day:'numeric', month:'short'}), y: runningBal };
-  });
-
-  lineChart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: chartData.map(d => d.x),
-      datasets: [{
-        label: "Saldo",
-        data: chartData.map(d => d.y),
-        borderColor: "#6366f1",
-        backgroundColor: "rgba(99,102,241,0.1)",
-        fill: true,
-        tension: 0.4,
-        borderWidth: 2,
-        pointRadius: 3,
-        pointBackgroundColor: "#6366f1"
-      }]
-    },
-    options: {
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: {
-          display: true, // AKTIFKAN SUMBU Y
-          grid: { color: "rgba(255,255,255,0.05)" },
-          ticks: {
-            color: "#4a5568",
-            font: { size: 10 },
-            callback: (val) => "Rp " + (val/1000) + "k"
-          }
-        },
-        x: {
-          display: true, // AKTIFKAN SUMBU X
-          grid: { display: false },
-          ticks: { color: "#4a5568", font: { size: 10 } }
-        }
-      }
-    }
-  });
-}
-
 // ═══════════════════════════════════════════
-// CRUD ACTIONS
+// ACTIONS
 // ═══════════════════════════════════════════
 async function simpan() {
   const desc = document.getElementById("f-desc").value;
   const amt = document.getElementById("f-amt").value;
-  const kat = document.getElementById("f-kat").value;
-
   if(!desc || !amt) return toast("Lengkapi data!", "error");
 
   const btn = document.getElementById("submitBtn");
@@ -629,30 +592,25 @@ async function simpan() {
     await fetch(API + "/api/tambah", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ deskripsi: desc, jumlah: parseFloat(amt), kategori: kat, email_id: "admin@sentinel.com" })
+      body: JSON.stringify({ 
+        deskripsi: desc, 
+        jumlah: parseFloat(amt), 
+        kategori: document.getElementById("f-kat").value, 
+        email_id: "admin@sentinel.com" 
+      })
     });
-    
     document.getElementById("f-desc").value = "";
     document.getElementById("f-amt").value = "";
-    toast("Berhasil dicatat", "success");
+    toast("Tersimpan!", "success");
     refresh();
-  } catch (e) {
-    toast("Gagal simpan", "error");
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = "Catat";
-  }
+  } catch (e) { toast("Gagal simpan", "error"); }
+  finally { btn.disabled = false; btn.innerHTML = "Catat"; }
 }
 
 async function hapus(id) {
-  if(!confirm("Hapus transaksi?")) return;
-  try {
-    await fetch(`${API}/api/hapus?id=${id}`, { method: "DELETE" });
-    toast("Berhasil dihapus", "success");
-    refresh();
-  } catch (e) {
-    toast("Gagal hapus", "error");
-  }
+  if(!confirm("Hapus transaksi ini?")) return;
+  await fetch(`${API}/api/hapus?id=${id}`, { method: "DELETE" });
+  refresh();
 }
 
 function toast(msg, type) {
