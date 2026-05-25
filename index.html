@@ -476,14 +476,31 @@ function updateLineChart(data) {
   const ctx = document.getElementById("lineChart");
   if (lineChart) lineChart.destroy();
 
-  const sorted = [...data].sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+  const sorted = [...data].sort(
+    (a, b) => new Date(a.tanggal) - new Date(b.tanggal)
+  );
+
   let cumulativeLiquidity = 0;
-  
-  const labels = sorted.map(t => new Date(t.tanggal).toLocaleDateString("id-ID", {day:'numeric', month:'short'}));
+
+  const labels = sorted.map(t =>
+    new Date(t.tanggal).toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "short"
+    })
+  );
+
   const values = sorted.map(t => {
-    // Trend saldo didasarkan pada Likuiditas (Masuk - (Keluar+Dar+Inv))
-    const impact = (t.kategori === 'pemasukan') ? t.jumlah : -t.jumlah;
+
+    // Hanya pengeluaran yang mengurangi cashflow
+    const impact =
+      t.kategori === "pemasukan"
+        ? t.jumlah
+        : t.kategori === "pengeluaran"
+          ? -t.jumlah
+          : 0;
+
     cumulativeLiquidity += impact;
+
     return cumulativeLiquidity;
   });
 
@@ -492,26 +509,44 @@ function updateLineChart(data) {
     data: {
       labels: labels,
       datasets: [{
-        label: "Likuiditas",
+        label: "Cashflow",
         data: values,
         borderColor: "#6366f1",
         backgroundColor: "rgba(99,102,241,0.1)",
-        fill: true, tension: 0.4, borderWidth: 2, pointRadius: 3
+        fill: true,
+        tension: 0.4,
+        borderWidth: 2,
+        pointRadius: 3
       }]
     },
     options: {
       maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
       scales: {
-        y: { 
-            display: true, 
-            ticks: { color: "#4a5568", font: { size: 9 }, callback: v => "Rp " + (v/1000) + "k" },
-            grid: { color: "rgba(255,255,255,0.05)" }
+        y: {
+          display: true,
+          ticks: {
+            color: "#4a5568",
+            font: { size: 9 },
+            callback: v => "Rp " + (v / 1000) + "k"
+          },
+          grid: {
+            color: "rgba(255,255,255,0.05)"
+          }
         },
-        x: { 
-            display: true, 
-            ticks: { color: "#4a5568", font: { size: 9 } },
-            grid: { display: false }
+        x: {
+          display: true,
+          ticks: {
+            color: "#4a5568",
+            font: { size: 9 }
+          },
+          grid: {
+            display: false
+          }
         }
       }
     }
