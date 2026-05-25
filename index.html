@@ -426,7 +426,7 @@ function logout() {
 }
 
 // ═══════════════════════════════════════════
-// CORE LOGIC (Updated Formula)
+// CORE LOGIC
 // ═══════════════════════════════════════════
 function initApp() {
   document.getElementById("auth-screen").style.display = "none";
@@ -444,13 +444,12 @@ function initApp() {
   refresh();
 }
 
-  async function refresh() {
+async function refresh() {
   try {
     const selMonth = parseInt(document.getElementById("filterMonth").value);
     const selYear  = parseInt(document.getElementById("filterYear").value);
     const bulanStr = `${selYear}-${String(selMonth + 1).padStart(2, '0')}`;
 
-    // Kartu & Gauge → ALL-TIME
     const resData = await fetch(API + "/api/data");
     const stats   = await resData.json();
     document.getElementById("v-asset").textContent = "Rp " + stats.totalAsset.toLocaleString("id-ID");
@@ -458,7 +457,6 @@ function initApp() {
     document.getElementById("v-net").textContent   = "Rp " + stats.saldoBersih.toLocaleString("id-ID");
     updateGauge(stats.dana_darurat);
 
-    // Tabel & Grafik → filter per bulan
     const resTx    = await fetch(`${API}/api/transaksi?bulan=${bulanStr}`);
     const filtered = await resTx.json();
     updateTable(filtered);
@@ -476,78 +474,34 @@ function updateLineChart(data) {
   const ctx = document.getElementById("lineChart");
   if (lineChart) lineChart.destroy();
 
-  const sorted = [...data].sort(
-    (a, b) => new Date(a.tanggal) - new Date(b.tanggal)
-  );
-
+  const sorted = [...data].sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
   let cumulativeLiquidity = 0;
 
-  const labels = sorted.map(t =>
-    new Date(t.tanggal).toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "short"
-    })
-  );
-
+  const labels = sorted.map(t => new Date(t.tanggal).toLocaleDateString("id-ID", { day: "numeric", month: "short" }));
   const values = sorted.map(t => {
-
-    // Hanya pengeluaran yang mengurangi cashflow
-    const impact =
-      t.kategori === "pemasukan"
-        ? t.jumlah
-        : t.kategori === "pengeluaran"
-          ? -t.jumlah
-          : 0;
-
+    const impact = t.kategori === "pemasukan" ? t.jumlah : t.kategori === "pengeluaran" ? -t.jumlah : 0;
     cumulativeLiquidity += impact;
-
     return cumulativeLiquidity;
   });
 
   lineChart = new Chart(ctx, {
     type: "line",
     data: {
-      labels: labels,
+      labels,
       datasets: [{
         label: "Cashflow",
         data: values,
         borderColor: "#6366f1",
         backgroundColor: "rgba(99,102,241,0.1)",
-        fill: true,
-        tension: 0.4,
-        borderWidth: 2,
-        pointRadius: 3
+        fill: true, tension: 0.4, borderWidth: 2, pointRadius: 3
       }]
     },
     options: {
       maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: false
-        }
-      },
+      plugins: { legend: { display: false } },
       scales: {
-        y: {
-          display: true,
-          ticks: {
-            color: "#4a5568",
-            font: { size: 9 },
-            callback: v => "Rp " + (v / 1000) + "k"
-          },
-          grid: {
-            color: "rgba(255,255,255,0.05)"
-          }
-        },
-        x: {
-          display: true,
-          ticks: {
-            color: "#4a5568",
-            font: { size: 9 }
-          },
-          grid: {
-            display: false
-          }
-        }
+        y: { display: true, ticks: { color: "#4a5568", font: { size: 9 }, callback: v => "Rp " + (v / 1000) + "k" }, grid: { color: "rgba(255,255,255,0.05)" } },
+        x: { display: true, ticks: { color: "#4a5568", font: { size: 9 } }, grid: { display: false } }
       }
     }
   });
@@ -556,7 +510,6 @@ function updateLineChart(data) {
 function updateTable(list) {
   const body = document.getElementById("tableBody");
   document.getElementById("txCount").textContent = list.length + " item";
-  
   const pillMap = { pemasukan:"pill-in", pengeluaran:"pill-out", investasi:"pill-invest", dana_darurat:"pill-dana" };
   body.innerHTML = list.sort((a,b) => new Date(b.tanggal) - new Date(a.tanggal)).map(t => `
     <tr>
@@ -589,8 +542,8 @@ function updateGauge(val) {
 // ═══════════════════════════════════════════
 async function simpan() {
   const desc = document.getElementById("f-desc").value;
-  const amt = document.getElementById("f-amt").value;
-  if(!desc || !amt) return toast("Lengkapi data!", "error");
+  const amt  = document.getElementById("f-amt").value;
+  if (!desc || !amt) return toast("Lengkapi data!", "error");
 
   const btn = document.getElementById("submitBtn");
   btn.disabled = true;
@@ -600,15 +553,15 @@ async function simpan() {
     await fetch(API + "/api/tambah", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-        deskripsi: desc, 
-        jumlah: parseFloat(amt), 
-        kategori: document.getElementById("f-kat").value, 
-        email_id: "admin@sentinel.com" 
+      body: JSON.stringify({
+        deskripsi: desc,
+        jumlah: parseFloat(amt),
+        kategori: document.getElementById("f-kat").value,
+        sumber: "manual"  // ✅ FIX: tandai sebagai manual, Worker akan generate email_id unik
       })
     });
     document.getElementById("f-desc").value = "";
-    document.getElementById("f-amt").value = "";
+    document.getElementById("f-amt").value  = "";
     toast("Tersimpan!", "success");
     refresh();
   } catch (e) { toast("Gagal simpan", "error"); }
@@ -616,14 +569,14 @@ async function simpan() {
 }
 
 async function hapus(id) {
-  if(!confirm("Hapus transaksi ini?")) return;
+  if (!confirm("Hapus transaksi ini?")) return;
   await fetch(`${API}/api/hapus?id=${id}`, { method: "DELETE" });
   refresh();
 }
 
 function toast(msg, type) {
   const wrap = document.getElementById("toastWrap");
-  const el = document.createElement("div");
+  const el   = document.createElement("div");
   el.className = `toast ${type}`;
   el.textContent = msg;
   wrap.appendChild(el);
