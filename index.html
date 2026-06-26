@@ -861,13 +861,13 @@ async function refresh() {
         const endStr=`${endDate.getFullYear()}-${pad(endDate.getMonth()+1)}-${pad(endDate.getDate())}`;
 
         // Total Aset: kumulatif all-time (tidak di-reset)
-        const resData=await fetch(API + "/api/data");
+        const resData=await fetch(`${API}/api/data?_=${Date.now()}`);
         const stats=await resData.json();
         document.getElementById("v-asset").textContent="Rp "+stats.totalAsset.toLocaleString("id-ID");
         updateGauge(stats.dana_darurat);
 
         // Ambil transaksi periode ini
-        const resTx=await fetch(`${API}/api/transaksi?start=${startStr}&end=${endStr}`);
+        const resTx=await fetch(`${API}/api/transaksi?start=${startStr}&end=${endStr}&_=${Date.now()}`);
         const filtered=await resTx.json();
 
         // Hitung pengeluaran & kas dari data periode saja (bukan all-time)
@@ -912,7 +912,7 @@ function updateLineChart(data) {
         }));
 
 const values=sorted.map(t=> {
-        const impact=t.kategori==="pemasukan" ? t.jumlah : t.kategori==="pengeluaran" ? -t.jumlah : 0;
+        const impact = t.kategori === "pemasukan" ? parseFloat(t.jumlah) : -parseFloat(t.jumlah);
         cumulativeLiquidity +=impact;
         return cumulativeLiquidity;
     });
@@ -1035,11 +1035,15 @@ async function simpanEdit() {
     btn.innerHTML = `<span class="spinner"></span>`;
 
     try {
-        await fetch(API + "/api/edit", {
+        const res = await fetch(API + "/api/edit", {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id, kategori, deskripsi, jumlah: parseFloat(jumlah) })
+            body: JSON.stringify({ id: isNaN(id) ? id : Number(id), kategori, deskripsi, jumlah: parseFloat(jumlah) })
         });
+        
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Gagal menyimpan");
+
         toast("Berhasil diubah!", "success");
         tutupEdit();
         refresh();
