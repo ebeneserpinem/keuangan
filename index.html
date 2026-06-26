@@ -1,4 +1,4 @@
-< !DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pinem Finance</title><link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"><script src="https://cdn.jsdelivr.net/npm/chart.js"></script><style>:root {
+<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pinem Finance</title><link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"><script src="https://cdn.jsdelivr.net/npm/chart.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script><style>:root {
     --bg: #080c14;
     --bg2: #0d1220;
     --bg3: #121929;
@@ -703,7 +703,7 @@ tbody td {
     cursor: pointer;
 }
 
-</style></head><body><div class="ambient ambient-1"></div><div class="ambient ambient-2"></div><div class="toast-wrap" id="toastWrap"></div>< !-- ═══ LOGIN SCREEN ═══ --><div id="auth-screen"><div class="auth-box"><div class="auth-logo"><span>P</span>inem<span>.</span></div><div class="auth-sub">Manajemen Keuangan Eben</div><div class="login-form"><div class="form-group"><label>Username</label><input type="text" id="login-user" class="form-control" placeholder="Admin"></div><div class="form-group"><label>Password</label><input type="password" id="login-pass" class="form-control" placeholder="••••••••" onkeydown="if(event.key==='Enter') handleLogin()"></div><button class="btn btn-primary" onclick="handleLogin()" style="width:100%; margin-top:10px; height:45px;">Masuk Vault</button><div id="login-error" style="color:var(--red); font-size:12px; text-align:center; height:15px; margin-top:5px;"></div></div></div></div>< !-- ═══ APP SHELL ═══ --><div id="app" style="display:none; flex:1;"><aside class="sidebar"><div class="sidebar-logo"><span>P</span>inem<span>.</span><em>Financial Vault v2.5</em></div><div class="nav-section">Utama</div><div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>Dashboard</div><div class="sidebar-footer"><div class="user-chip" onclick="logout()"><div class="user-avatar">A</div><div class="user-info"><div class="user-name">Admin User</div><div class="user-role">Klik untuk Keluar</div></div></div></div></aside><main><div class="topbar"><div class="topbar-left"><h1>Keuangan Pinem</h1><p id="greeting">Memuat...</p></div><div class="topbar-right"><div class="filter-container"><select id="filterMonth" class="filter-select" onchange="refresh()"><option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option><option value="3">April</option><option value="4">Mei</option><option value="5">Juni</option><option value="6">Juli</option><option value="7">Agustus</option><option value="8">September</option><option value="9">Oktober</option><option value="10">November</option><option value="11">Desember</option></select><select id="filterYear" class="filter-select" onchange="refresh()"></select></div><button class="btn btn-ghost" onclick="refresh()">Refresh</button></div></div><div class="stats-row"><div class="stat-card"><div class="stat-icon green">💰</div><div class="stat-label">Total Aset</div><div class="stat-value green" id="v-asset">Rp 0</div></div><div class="stat-card"><div class="stat-icon red">📉</div><div class="stat-label">Total Pengeluaran</div><div class="stat-value red" id="v-exp">Rp 0</div></div><div class="stat-card"><div class="stat-icon blue">⚖️</div><div class="stat-label">Kas Tersedia</div><div class="stat-value blue" id="v-net">Rp 0</div></div></div><div class="grid2"><div class="card"><div class="card-title">Dana Darurat</div><div class="fund-row"><div class="gauge-wrap"><canvas id="gaugeChart"></canvas><div class="gauge-center"><div class="gauge-pct" id="perc-text">0%</div></div></div><div style="flex:1"><div class="stat-label">Target Dana Rp 20jt</div><div id="target-msg" style="font-size:12px; color:var(--text2); line-height:1.4">Memuat...</div></div></div></div><div class="card"><div class="card-title">Tren Saldo Harian</div><div class="chart-wrap"><canvas id="lineChart"></canvas></div></div></div><div class="card" style="margin-bottom:24px;"><div class="card-title">Input Transaksi</div><div class="form-row"><div class="form-group"><label>Kategori</label><select class="form-control" id="f-kat"><option value="pemasukan">💚 Pemasukan</option><option value="pengeluaran">🔴 Pengeluaran</option><option value="investasi">🔵 Investasi</option><option value="dana_darurat">🟡 Dana Darurat</option></select></div><div class="form-group"><label>Deskripsi</label><input type="text" class="form-control" id="f-desc" placeholder="Gaji, Investasi, dll"></div><div class="form-group"><label>Nominal</label><input type="number" class="form-control" id="f-amt" placeholder="0"></div><button class="btn btn-primary" id="submitBtn" onclick="simpan()" style="height:44px">Catat</button></div></div><div class="card table-card"><div class="table-header"><div class="card-title">Log Transaksi</div><div id="txCount" style="font-size:11px; color:var(--text3)">0 item</div></div><div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>Kategori</th><th>Deskripsi</th><th style="text-align:right">Nominal</th><th style="text-align:center">Aksi</th></tr></thead><tbody id="tableBody"></tbody></table></div></div></main></div><script>const API="https://finance-worker.ebeneserpinem6.workers.dev";
+</style></head><body><div class="ambient ambient-1"></div><div class="ambient ambient-2"></div><div class="toast-wrap" id="toastWrap"></div><!-- ═══ LOGIN SCREEN ═══ --><div id="auth-screen"><div class="auth-box"><div class="auth-logo"><span>P</span>inem<span>.</span></div><div class="auth-sub">Manajemen Keuangan Eben</div><div class="login-form"><div class="form-group"><label>Username</label><input type="text" id="login-user" class="form-control" placeholder="Admin"></div><div class="form-group"><label>Password</label><input type="password" id="login-pass" class="form-control" placeholder="••••••••" onkeydown="if(event.key==='Enter') handleLogin()"></div><button class="btn btn-primary" onclick="handleLogin()" style="width:100%; margin-top:10px; height:45px;">Masuk Vault</button><div id="login-error" style="color:var(--red); font-size:12px; text-align:center; height:15px; margin-top:5px;"></div></div></div></div><!-- ═══ APP SHELL ═══ --><div id="app" style="display:none; flex:1;"><aside class="sidebar"><div class="sidebar-logo"><span>P</span>inem<span>.</span><em>Financial Vault v2.5</em></div><div class="nav-section">Utama</div><div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>Dashboard</div><div class="sidebar-footer"><div class="user-chip" onclick="logout()"><div class="user-avatar">A</div><div class="user-info"><div class="user-name">Admin User</div><div class="user-role">Klik untuk Keluar</div></div></div></div></aside><main><div class="topbar"><div class="topbar-left"><h1>Keuangan Pinem</h1><p id="greeting">Memuat...</p></div><div class="topbar-right"><div class="filter-container"><select id="filterMonth" class="filter-select" onchange="refresh()"><option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option><option value="3">April</option><option value="4">Mei</option><option value="5">Juni</option><option value="6">Juli</option><option value="7">Agustus</option><option value="8">September</option><option value="9">Oktober</option><option value="10">November</option><option value="11">Desember</option></select><select id="filterYear" class="filter-select" onchange="refresh()"></select></div><button class="btn btn-ghost" onclick="refresh()">Refresh</button><button class="btn btn-primary" onclick="generatePDF()" style="gap:6px">📄 PDF</button></div></div><div class="stats-row"><div class="stat-card"><div class="stat-icon green">💰</div><div class="stat-label">Total Aset</div><div class="stat-value green" id="v-asset">Rp 0</div></div><div class="stat-card"><div class="stat-icon red">📉</div><div class="stat-label">Pengeluaran Periode</div><div class="stat-value red" id="v-exp">Rp 0</div></div><div class="stat-card"><div class="stat-icon blue">⚖️</div><div class="stat-label">Kas Periode</div><div class="stat-value blue" id="v-net">Rp 0</div></div></div><div class="grid2"><div class="card"><div class="card-title">Dana Darurat</div><div class="fund-row"><div class="gauge-wrap"><canvas id="gaugeChart"></canvas><div class="gauge-center"><div class="gauge-pct" id="perc-text">0%</div></div></div><div style="flex:1"><div class="stat-label">Target Dana Rp 20jt</div><div id="target-msg" style="font-size:12px; color:var(--text2); line-height:1.4">Memuat...</div></div></div></div><div class="card"><div class="card-title">Tren Saldo Harian</div><div class="chart-wrap"><canvas id="lineChart"></canvas></div></div></div><div class="card" style="margin-bottom:24px;"><div class="card-title">Input Transaksi</div><div class="form-row"><div class="form-group"><label>Kategori</label><select class="form-control" id="f-kat"><option value="pemasukan">💚 Pemasukan</option><option value="pengeluaran">🔴 Pengeluaran</option><option value="investasi">🔵 Investasi</option><option value="dana_darurat">🟡 Dana Darurat</option></select></div><div class="form-group"><label>Deskripsi</label><input type="text" class="form-control" id="f-desc" placeholder="Gaji, Investasi, dll"></div><div class="form-group"><label>Nominal</label><input type="number" class="form-control" id="f-amt" placeholder="0"></div><button class="btn btn-primary" id="submitBtn" onclick="simpan()" style="height:44px">Catat</button></div></div><div class="card table-card"><div class="table-header"><div class="card-title">Log Transaksi</div><div id="txCount" style="font-size:11px; color:var(--text3)">0 item</div></div><div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>Kategori</th><th>Deskripsi</th><th style="text-align:right">Nominal</th><th style="text-align:center">Aksi</th></tr></thead><tbody id="tableBody"></tbody></table></div></div></main></div><script>const API="https://finance-worker.ebeneserpinem6.workers.dev";
 const TARGET_DANA=20000000;
 let gaugeChart=null,
 lineChart=null;
@@ -772,23 +772,38 @@ async function refresh() {
         const selMonth=parseInt(document.getElementById("filterMonth").value);
         const selYear=parseInt(document.getElementById("filterYear").value);
 
-        // Periode tanggal 26: dari tgl 26 bulan lalu s/d tgl 25 bulan ini
+        // Gunakan format tanggal lokal (bukan toISOString) agar tidak kena bug UTC offset
+        const pad=n=>String(n).padStart(2,'0');
         const startDate=new Date(selYear, selMonth - 1, 26);
         const endDate=new Date(selYear, selMonth, 25);
-        const startStr=startDate.toISOString().split('T')[0];
-        const endStr=endDate.toISOString().split('T')[0];
+        const startStr=`${startDate.getFullYear()}-${pad(startDate.getMonth()+1)}-${pad(startDate.getDate())}`;
+        const endStr=`${endDate.getFullYear()}-${pad(endDate.getMonth()+1)}-${pad(endDate.getDate())}`;
 
+        // Total Aset: kumulatif all-time (tidak di-reset)
         const resData=await fetch(API + "/api/data");
         const stats=await resData.json();
         document.getElementById("v-asset").textContent="Rp "+stats.totalAsset.toLocaleString("id-ID");
-        document.getElementById("v-exp").textContent="Rp "+stats.pengeluaran.toLocaleString("id-ID");
-        document.getElementById("v-net").textContent="Rp "+stats.saldoBersih.toLocaleString("id-ID");
         updateGauge(stats.dana_darurat);
 
+        // Ambil transaksi periode ini
         const resTx=await fetch(`${API}/api/transaksi?start=${startStr}&end=${endStr}`);
         const filtered=await resTx.json();
+
+        // Hitung pengeluaran & kas dari data periode saja (bukan all-time)
+        let periodPemasukan=0, periodPengeluaran=0;
+        filtered.forEach(t=>{
+            const jml=parseFloat(t.jumlah)||0;
+            if(t.kategori==='pemasukan') periodPemasukan+=jml;
+            if(t.kategori==='pengeluaran') periodPengeluaran+=jml;
+        });
+        document.getElementById("v-exp").textContent="Rp "+periodPengeluaran.toLocaleString("id-ID");
+        document.getElementById("v-net").textContent="Rp "+(periodPemasukan-periodPengeluaran).toLocaleString("id-ID");
+
         updateTable(filtered);
         updateLineChart(filtered);
+
+        // Simpan data periode aktif untuk fitur PDF
+        window._periodData={startStr,endStr,filtered,periodPemasukan,periodPengeluaran,totalAsset:stats.totalAsset};
 
     } catch (e) {
         toast("Koneksi Error", "error");
@@ -959,6 +974,83 @@ function toast(msg, type) {
     el.textContent=msg;
     wrap.appendChild(el);
     setTimeout(()=>{el.style.opacity="0";setTimeout(()=>el.remove(),500);},3000);
+}
+
+function generatePDF() {
+    if (!window._periodData) return toast("Refresh data dulu!", "error");
+    const {startStr,endStr,filtered,periodPemasukan,periodPengeluaran,totalAsset}=window._periodData;
+    const selMonth=parseInt(document.getElementById("filterMonth").value);
+    const selYear=document.getElementById("filterYear").value;
+    const bulanNames=["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+    const fmtDate=s=>new Date(s+"T12:00:00").toLocaleDateString("id-ID",{day:"numeric",month:"long",year:"numeric"});
+
+    const {jsPDF}=window.jspdf;
+    const doc=new jsPDF();
+
+    // Header
+    doc.setFillColor(99,102,241);
+    doc.rect(0,0,210,36,"F");
+    doc.setTextColor(255,255,255);
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(20);
+    doc.text("Laporan Keuangan Pinem",105,16,{align:"center"});
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(10);
+    doc.text(`Periode ${bulanNames[selMonth]} ${selYear}  \u2022  ${fmtDate(startStr)} s/d ${fmtDate(endStr)}`,105,26,{align:"center"});
+    doc.setTextColor(0,0,0);
+
+    // Ringkasan
+    doc.setFontSize(9);
+    doc.setFont("helvetica","bold");
+    doc.setFillColor(245,246,255);
+    doc.roundedRect(14,42,54,22,2,2,"F");
+    doc.roundedRect(78,42,54,22,2,2,"F");
+    doc.roundedRect(142,42,54,22,2,2,"F");
+    doc.setTextColor(80,80,80);
+    doc.text("TOTAL ASET (KUMULATIF)",41,49,{align:"center"});
+    doc.text("PENGELUARAN PERIODE",105,49,{align:"center"});
+    doc.text("KAS PERIODE",169,49,{align:"center"});
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(11);
+    doc.setTextColor(30,120,30);
+    doc.text("Rp "+totalAsset.toLocaleString("id-ID"),41,58,{align:"center"});
+    doc.setTextColor(200,30,30);
+    doc.text("Rp "+periodPengeluaran.toLocaleString("id-ID"),105,58,{align:"center"});
+    doc.setTextColor(30,30,200);
+    doc.text("Rp "+(periodPemasukan-periodPengeluaran).toLocaleString("id-ID"),169,58,{align:"center"});
+    doc.setTextColor(0,0,0);
+
+    // Tabel transaksi
+    const rows=filtered.sort((a,b)=>new Date(a.tanggal)-new Date(b.tanggal)).map(t=>[
+        new Date(t.tanggal+"T12:00:00").toLocaleDateString("id-ID"),
+        t.kategori.replace("_"," "),
+        t.deskripsi,
+        "Rp "+parseFloat(t.jumlah).toLocaleString("id-ID")
+    ]);
+
+    doc.autoTable({
+        startY:70,
+        head:[["Tanggal","Kategori","Deskripsi","Nominal"]],
+        body:rows,
+        styles:{fontSize:9,cellPadding:3},
+        headStyles:{fillColor:[99,102,241],textColor:255,fontStyle:"bold"},
+        alternateRowStyles:{fillColor:[248,248,255]},
+        columnStyles:{3:{halign:"right"},0:{cellWidth:28},1:{cellWidth:28},3:{cellWidth:35}},
+        foot:[["TOTAL","","","Rp "+periodPengeluaran.toLocaleString("id-ID")]],
+        footStyles:{fillColor:[230,230,245],fontStyle:"bold",textColor:[50,50,100]}
+    });
+
+    // Footer
+    const pageCount=doc.internal.getNumberOfPages();
+    for(let i=1;i<=pageCount;i++){
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(150,150,150);
+        doc.text(`Dicetak: ${new Date().toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}  |  Halaman ${i} dari ${pageCount}`,105,290,{align:"center"});
+    }
+
+    doc.save(`Laporan_${bulanNames[selMonth]}_${selYear}.pdf`);
+    toast("PDF berhasil diunduh!", "success");
 }
 
 window.onload=checkAuth;
