@@ -1,589 +1,965 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pinem Finance</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-:root {
-  --bg: #080c14;
-  --bg2: #0d1220;
-  --bg3: #121929;
-  --surface: rgba(255,255,255,0.04);
-  --surface-hover: rgba(255,255,255,0.07);
-  --border: rgba(255,255,255,0.07);
-  --border-active: rgba(99,102,241,0.5);
-  --text1: #f0f2f8;
-  --text2: #8892a4;
-  --text3: #4a5568;
-  --accent: #6366f1;
-  --accent2: #818cf8;
-  --green: #10b981;
-  --green-bg: rgba(16,185,129,0.1);
-  --red: #f43f5e;
-  --red-bg: rgba(244,63,94,0.1);
-  --amber: #f59e0b;
-  --amber-bg: rgba(245,158,11,0.1);
-  --radius: 16px;
-  --radius-sm: 10px;
-  --sidebar: 260px;
-  --font: 'DM Sans', sans-serif;
-  --font-display: 'Syne', sans-serif;
-  --font-mono: 'DM Mono', monospace;
+< !DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pinem Finance</title><link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"><script src="https://cdn.jsdelivr.net/npm/chart.js"></script><style>:root {
+    --bg: #080c14;
+    --bg2: #0d1220;
+    --bg3: #121929;
+    --surface: rgba(255, 255, 255, 0.04);
+    --surface-hover: rgba(255, 255, 255, 0.07);
+    --border: rgba(255, 255, 255, 0.07);
+    --border-active: rgba(99, 102, 241, 0.5);
+    --text1: #f0f2f8;
+    --text2: #8892a4;
+    --text3: #4a5568;
+    --accent: #6366f1;
+    --accent2: #818cf8;
+    --green: #10b981;
+    --green-bg: rgba(16, 185, 129, 0.1);
+    --red: #f43f5e;
+    --red-bg: rgba(244, 63, 94, 0.1);
+    --amber: #f59e0b;
+    --amber-bg: rgba(245, 158, 11, 0.1);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --sidebar: 260px;
+    --font: 'DM Sans', sans-serif;
+    --font-display: 'Syne', sans-serif;
+    --font-mono: 'DM Mono', monospace;
 }
 
-*{margin:0;padding:0;box-sizing:border-box;}
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
 body {
-  font-family: var(--font);
-  background: var(--bg);
-  color: var(--text1);
-  min-height: 100vh;
-  display: flex;
-  overflow-x: hidden;
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text1);
+    min-height: 100vh;
+    display: flex;
+    overflow-x: hidden;
 }
 
 body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 0;
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
 }
 
 .ambient {
-  position: fixed;
-  border-radius: 50%;
-  filter: blur(120px);
-  pointer-events: none;
-  z-index: 0;
-  animation: driftGlow 12s ease-in-out infinite;
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+    animation: driftGlow 12s ease-in-out infinite;
 }
-.ambient-1 { width: 600px; height: 600px; background: rgba(99,102,241,0.07); top: -200px; right: -100px; }
-.ambient-2 { width: 400px; height: 400px; background: rgba(16,185,129,0.05); bottom: -100px; left: 100px; animation-delay: -6s; }
 
-@keyframes driftGlow { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(20px,-20px) scale(1.05)} }
+.ambient-1 {
+    width: 600px;
+    height: 600px;
+    background: rgba(99, 102, 241, 0.07);
+    top: -200px;
+    right: -100px;
+}
+
+.ambient-2 {
+    width: 400px;
+    height: 400px;
+    background: rgba(16, 185, 129, 0.05);
+    bottom: -100px;
+    left: 100px;
+    animation-delay: -6s;
+}
+
+@keyframes driftGlow {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1)
+    }
+
+    50% {
+        transform: translate(20px, -20px) scale(1.05)
+    }
+}
 
 /* ─── AUTH SCREEN ─── */
 #auth-screen {
-  position: fixed; inset: 0; z-index: 1000;
-  background: var(--bg);
-  display: flex; align-items: center; justify-content: center;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
+
 .auth-box {
-  width: 380px; padding: 48px 40px;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 24px;
-  text-align: center;
-  animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1);
+    width: 380px;
+    padding: 48px 40px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    text-align: center;
+    animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
 .auth-logo {
-  font-family: var(--font-display);
-  font-size: 28px; font-weight: 800;
-  letter-spacing: -1px; margin-bottom: 6px;
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 6px;
 }
-.auth-logo span { color: var(--accent); }
-.auth-sub { color: var(--text2); font-size: 14px; margin-bottom: 30px; line-height: 1.5; }
-.login-form { text-align: left; display: flex; flex-direction: column; gap: 16px; }
+
+.auth-logo span {
+    color: var(--accent);
+}
+
+.auth-sub {
+    color: var(--text2);
+    font-size: 14px;
+    margin-bottom: 30px;
+    line-height: 1.5;
+}
+
+.login-form {
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
 
 /* ─── SIDEBAR ─── */
 .sidebar {
-  width: var(--sidebar);
-  background: var(--bg2);
-  border-right: 1px solid var(--border);
-  height: 100vh;
-  position: sticky; top: 0;
-  display: flex; flex-direction: column;
-  padding: 28px 16px;
-  z-index: 10;
-  flex-shrink: 0;
+    width: var(--sidebar);
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 28px 16px;
+    z-index: 10;
+    flex-shrink: 0;
 }
-.sidebar-logo {
-  font-family: var(--font-display);
-  font-size: 20px; font-weight: 800;
-  letter-spacing: -0.5px;
-  padding: 4px 12px 24px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 20px;
-}
-.sidebar-logo span { color: var(--accent); }
-.sidebar-logo em { color: var(--text3); font-style: normal; font-weight: 400; font-size: 11px; letter-spacing: 0; display: block; margin-top: 2px; }
 
-.nav-section { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; color: var(--text3); padding: 0 12px; margin: 8px 0 6px; text-transform: uppercase; }
-.nav-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 11px 12px;
-  border-radius: var(--radius-sm);
-  color: var(--text2);
-  font-size: 13.5px; font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  margin-bottom: 2px;
-  border: 1px solid transparent;
+.sidebar-logo {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    padding: 4px 12px 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
 }
-.nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
-.nav-item:hover { background: var(--surface-hover); color: var(--text1); }
-.nav-item.active { background: rgba(99,102,241,0.12); color: var(--accent2); border-color: rgba(99,102,241,0.2); }
+
+.sidebar-logo span {
+    color: var(--accent);
+}
+
+.sidebar-logo em {
+    color: var(--text3);
+    font-style: normal;
+    font-weight: 400;
+    font-size: 11px;
+    letter-spacing: 0;
+    display: block;
+    margin-top: 2px;
+}
+
+.nav-section {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: var(--text3);
+    padding: 0 12px;
+    margin: 8px 0 6px;
+    text-transform: uppercase;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 12px;
+    border-radius: var(--radius-sm);
+    color: var(--text2);
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 2px;
+    border: 1px solid transparent;
+}
+
+.nav-item svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+.nav-item:hover {
+    background: var(--surface-hover);
+    color: var(--text1);
+}
+
+.nav-item.active {
+    background: rgba(99, 102, 241, 0.12);
+    color: var(--accent2);
+    border-color: rgba(99, 102, 241, 0.2);
+}
 
 .sidebar-footer {
-  margin-top: auto;
-  border-top: 1px solid var(--border);
-  padding-top: 16px;
+    margin-top: auto;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
 }
-.user-chip {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 12px; border-radius: var(--radius-sm);
-  cursor: pointer; transition: 0.2s;
-  border: 1px solid transparent;
-}
-.user-chip:hover { background: var(--red-bg); border-color: rgba(244,63,94,0.2); }
-.user-avatar {
-  width: 32px; height: 32px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), #a855f7);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 700; color: white; flex-shrink: 0;
-}
-.user-info { flex: 1; min-width: 0; }
-.user-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.user-role { font-size: 11px; color: var(--text2); }
 
-@media (max-width: 900px) { .sidebar { display: none; } }
+.user-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: 0.2s;
+    border: 1px solid transparent;
+}
+
+.user-chip:hover {
+    background: var(--red-bg);
+    border-color: rgba(244, 63, 94, 0.2);
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #a855f7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+}
+
+.user-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.user-name {
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-role {
+    font-size: 11px;
+    color: var(--text2);
+}
+
+@media (max-width: 900px) {
+    .sidebar {
+        display: none;
+    }
+}
 
 /* ─── MAIN ─── */
 main {
-  flex: 1; min-width: 0;
-  padding: 32px 36px;
-  position: relative; z-index: 1;
+    flex: 1;
+    min-width: 0;
+    padding: 32px 36px;
+    position: relative;
+    z-index: 1;
 }
 
 /* ─── TOP BAR ─── */
 .topbar {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 36px;
 }
+
 .topbar-left h1 {
-  font-family: var(--font-display);
-  font-size: 22px; font-weight: 700;
-  letter-spacing: -0.5px;
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
 }
-.topbar-left p { color: var(--text2); font-size: 13px; margin-top: 3px; }
-.topbar-right { display: flex; gap: 10px; align-items: center; }
+
+.topbar-left p {
+    color: var(--text2);
+    font-size: 13px;
+    margin-top: 3px;
+}
+
+.topbar-right {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
 
 /* ─── BUTTONS ─── */
 .btn {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 9px 18px;
-  border-radius: var(--radius-sm);
-  font-family: var(--font);
-  font-size: 13px; font-weight: 500;
-  cursor: pointer; border: none;
-  transition: all 0.2s; letter-spacing: 0.01em;
-  white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 18px;
+    border-radius: var(--radius-sm);
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
 }
-.btn-primary { background: var(--accent); color: white; }
-.btn-primary:hover { filter: brightness(1.12); transform: translateY(-1px); }
-.btn-ghost { background: var(--surface); color: var(--text2); border: 1px solid var(--border); }
-.btn-ghost:hover { background: var(--surface-hover); color: var(--text1); }
+
+.btn-primary {
+    background: var(--accent);
+    color: white;
+}
+
+.btn-primary:hover {
+    filter: brightness(1.12);
+    transform: translateY(-1px);
+}
+
+.btn-ghost {
+    background: var(--surface);
+    color: var(--text2);
+    border: 1px solid var(--border);
+}
+
+.btn-ghost:hover {
+    background: var(--surface-hover);
+    color: var(--text1);
+}
 
 /* ─── STAT CARDS ─── */
-.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
 .stat-card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 24px;
-  position: relative; overflow: hidden;
-  transition: border-color 0.3s, transform 0.3s;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.3s;
 }
-.stat-card:hover { border-color: rgba(255,255,255,0.12); transform: translateY(-2px); }
+
+.stat-card:hover {
+    border-color: rgba(255, 255, 255, 0.12);
+    transform: translateY(-2px);
+}
+
 .stat-icon {
-  width: 36px; height: 36px; border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  margin-bottom: 16px; font-size: 16px;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    font-size: 16px;
 }
-.stat-icon.green { background: var(--green-bg); }
-.stat-icon.red { background: var(--red-bg); }
-.stat-icon.blue { background: rgba(99,102,241,0.12); }
-.stat-label { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; }
-.stat-value { font-family: var(--font-display); font-size: 26px; font-weight: 700; letter-spacing: -1px; line-height: 1; }
-.stat-value.green { color: var(--green); }
-.stat-value.red { color: var(--red); }
-.stat-value.blue { color: var(--accent2); }
+
+.stat-icon.green {
+    background: var(--green-bg);
+}
+
+.stat-icon.red {
+    background: var(--red-bg);
+}
+
+.stat-icon.blue {
+    background: rgba(99, 102, 241, 0.12);
+}
+
+.stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 8px;
+}
+
+.stat-value {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    line-height: 1;
+}
+
+.stat-value.green {
+    color: var(--green);
+}
+
+.stat-value.red {
+    color: var(--red);
+}
+
+.stat-value.blue {
+    color: var(--accent2);
+}
 
 /* ─── GRID 2 COL ─── */
-.grid2 { display: grid; grid-template-columns: 1fr 1.6fr; gap: 16px; margin-bottom: 24px; }
-.card { background: var(--bg2); border: 1px solid var(--border); border-radius: 20px; padding: 24px; }
-.card-title { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--text3); margin-bottom: 20px; }
+.grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+}
+
+.card-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 20px;
+}
 
 /* ─── GAUGE ─── */
-.gauge-wrap { position: relative; width: 160px; height: 160px; flex-shrink: 0; }
-.gauge-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
-.gauge-pct { font-family: var(--font-display); font-size: 26px; font-weight: 700; line-height: 1; }
-.fund-row { display: flex; align-items: center; gap: 20px; }
+.gauge-wrap {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    flex-shrink: 0;
+}
+
+.gauge-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.gauge-pct {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.fund-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
 
 /* ─── CHART CARD ─── */
-.chart-wrap { height: 200px; position: relative; padding-top: 10px; }
+.chart-wrap {
+    height: 200px;
+    position: relative;
+    padding-top: 10px;
+}
 
 /* ─── INPUT FORM ─── */
-.form-row { display: grid; grid-template-columns: 1fr 1.8fr 1fr auto; gap: 10px; align-items: end; }
-.form-group { display: flex; flex-direction: column; gap: 6px; }
-.form-group label { font-size: 11px; font-weight: 600; color: var(--text3); letter-spacing: 0.8px; text-transform: uppercase; }
-.form-control {
-  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
-  padding: 12px 16px; color: var(--text1); font-family: var(--font); font-size: 13.5px;
-  transition: all 0.2s; width: 100%; outline: none;
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1.8fr 1fr auto;
+    gap: 10px;
+    align-items: end;
 }
-.form-control:focus { border-color: var(--accent); background: rgba(99,102,241,0.06); }
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text3);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+.form-control {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    color: var(--text1);
+    font-family: var(--font);
+    font-size: 13.5px;
+    transition: all 0.2s;
+    width: 100%;
+    outline: none;
+}
+
+.form-control:focus {
+    border-color: var(--accent);
+    background: rgba(99, 102, 241, 0.06);
+}
 
 /* ─── TABLE ─── */
-.table-card { padding: 0; overflow: hidden; }
-.table-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-.table-wrap { width: 100%; overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; }
-thead th { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--text3); padding: 12px 24px; text-align: left; background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border); }
-tbody td { padding: 14px 24px; font-size: 13px; border-bottom: 1px solid var(--border); }
-.pill { padding: 4px 10px; border-radius: 99px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
-.pill-in { background: var(--green-bg); color: var(--green); }
-.pill-out { background: var(--red-bg); color: var(--red); }
-.pill-invest { background: rgba(99,102,241,0.12); color: var(--accent2); }
-.pill-dana { background: var(--amber-bg); color: var(--amber); }
+.table-card {
+    padding: 0;
+    overflow: hidden;
+}
 
-.del-btn { width: 28px; height: 28px; border-radius: 8px; background: transparent; border: none; color: var(--text3); cursor: pointer; transition: 0.2s; }
-.del-btn:hover { background: var(--red-bg); color: var(--red); }
+.table-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead th {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 12px 24px;
+    text-align: left;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid var(--border);
+}
+
+tbody td {
+    padding: 14px 24px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+}
+
+.pill {
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.pill-in {
+    background: var(--green-bg);
+    color: var(--green);
+}
+
+.pill-out {
+    background: var(--red-bg);
+    color: var(--red);
+}
+
+.pill-invest {
+    background: rgba(99, 102, 241, 0.12);
+    color: var(--accent2);
+}
+
+.pill-dana {
+    background: var(--amber-bg);
+    color: var(--amber);
+}
+
+.del-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: transparent;
+    border: none;
+    color: var(--text3);
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.del-btn:hover {
+    background: var(--red-bg);
+    color: var(--red);
+}
 
 /* ─── TOAST ─── */
-.toast-wrap { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 8px; z-index: 9999; }
-.toast { padding: 14px 18px; border-radius: 14px; font-size: 13px; font-weight: 500; border: 1px solid; animation: toastIn 0.4s cubic-bezier(0.16,1,0.3,1); }
-.toast.success { background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.3); color: #34d399; }
-.toast.error { background: rgba(244,63,94,0.15); border-color: rgba(244,63,94,0.3); color: #fb7185; }
+.toast-wrap {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 9999;
+}
 
-@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+.toast {
+    padding: 14px 18px;
+    border-radius: 14px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid;
+    animation: toastIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
 
-.spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.15); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
-@keyframes spin { to { transform: rotate(360deg); } }
+.toast.success {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.3);
+    color: #34d399;
+}
+
+.toast.error {
+    background: rgba(244, 63, 94, 0.15);
+    border-color: rgba(244, 63, 94, 0.3);
+    color: #fb7185;
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes toastIn {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: inline-block;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
 
 /* Filter Styling */
-.filter-container { display: flex; gap: 8px; background: var(--surface); padding: 4px; border-radius: 12px; border: 1px solid var(--border); }
-.filter-select { background: transparent; border: none; color: var(--text1); font-size: 12px; font-weight: 600; padding: 4px 8px; outline: none; cursor: pointer; }
+.filter-container {
+    display: flex;
+    gap: 8px;
+    background: var(--surface);
+    padding: 4px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+}
 
-</style>
-</head>
-<body>
+.filter-select {
+    background: transparent;
+    border: none;
+    color: var(--text1);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 8px;
+    outline: none;
+    cursor: pointer;
+}
 
-<div class="ambient ambient-1"></div>
-<div class="ambient ambient-2"></div>
-<div class="toast-wrap" id="toastWrap"></div>
-
-<!-- ═══ LOGIN SCREEN ═══ -->
-<div id="auth-screen">
-  <div class="auth-box">
-    <div class="auth-logo"><span>P</span>inem<span>.</span></div>
-    <div class="auth-sub">Manajemen Keuangan Eben</div>
-    <div class="login-form">
-      <div class="form-group">
-        <label>Username</label>
-        <input type="text" id="login-user" class="form-control" placeholder="Admin">
-      </div>
-      <div class="form-group">
-        <label>Password</label>
-        <input type="password" id="login-pass" class="form-control" placeholder="••••••••" onkeydown="if(event.key==='Enter') handleLogin()">
-      </div>
-      <button class="btn btn-primary" onclick="handleLogin()" style="width:100%; margin-top:10px; height:45px;">Masuk Vault</button>
-      <div id="login-error" style="color:var(--red); font-size:12px; text-align:center; height:15px; margin-top:5px;"></div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ APP SHELL ═══ -->
-<div id="app" style="display:none; flex:1;">
-  <aside class="sidebar">
-    <div class="sidebar-logo"><span>P</span>inem<span>.</span><em>Financial Vault v2.5</em></div>
-    <div class="nav-section">Utama</div>
-    <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</div>
-    <div class="sidebar-footer">
-      <div class="user-chip" onclick="logout()">
-        <div class="user-avatar">A</div>
-        <div class="user-info">
-          <div class="user-name">Admin User</div>
-          <div class="user-role">Klik untuk Keluar</div>
-        </div>
-      </div>
-    </div>
-  </aside>
-
-  <main>
-    <div class="topbar">
-      <div class="topbar-left">
-        <h1>Keuangan Pinem</h1>
-        <p id="greeting">Memuat...</p>
-      </div>
-      <div class="topbar-right">
-        <div class="filter-container">
-          <select id="filterMonth" class="filter-select" onchange="refresh()">
-            <option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option>
-            <option value="3">April</option><option value="4">Mei</option><option value="5">Juni</option>
-            <option value="6">Juli</option><option value="7">Agustus</option><option value="8">September</option>
-            <option value="9">Oktober</option><option value="10">November</option><option value="11">Desember</option>
-          </select>
-          <select id="filterYear" class="filter-select" onchange="refresh()"></select>
-        </div>
-        <button class="btn btn-ghost" onclick="refresh()">Refresh</button>
-      </div>
-    </div>
-
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-icon green">💰</div>
-        <div class="stat-label">Total Aset</div>
-        <div class="stat-value green" id="v-asset">Rp 0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon red">📉</div>
-        <div class="stat-label">Total Pengeluaran</div>
-        <div class="stat-value red" id="v-exp">Rp 0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon blue">⚖️</div>
-        <div class="stat-label">Kas Tersedia</div>
-        <div class="stat-value blue" id="v-net">Rp 0</div>
-      </div>
-    </div>
-
-    <div class="grid2">
-      <div class="card">
-        <div class="card-title">Dana Darurat</div>
-        <div class="fund-row">
-          <div class="gauge-wrap">
-            <canvas id="gaugeChart"></canvas>
-            <div class="gauge-center"><div class="gauge-pct" id="perc-text">0%</div></div>
-          </div>
-          <div style="flex:1">
-            <div class="stat-label">Target Dana Rp 20jt</div>
-            <div id="target-msg" style="font-size:12px; color:var(--text2); line-height:1.4">Memuat...</div>
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title">Tren Saldo Harian</div>
-        <div class="chart-wrap"><canvas id="lineChart"></canvas></div>
-      </div>
-    </div>
-
-    <div class="card" style="margin-bottom:24px;">
-      <div class="card-title">Input Transaksi</div>
-      <div class="form-row">
-        <div class="form-group"><label>Kategori</label><select class="form-control" id="f-kat"><option value="pemasukan">💚 Pemasukan</option><option value="pengeluaran">🔴 Pengeluaran</option><option value="investasi">🔵 Investasi</option><option value="dana_darurat">🟡 Dana Darurat</option></select></div>
-        <div class="form-group"><label>Deskripsi</label><input type="text" class="form-control" id="f-desc" placeholder="Gaji, Investasi, dll"></div>
-        <div class="form-group"><label>Nominal</label><input type="number" class="form-control" id="f-amt" placeholder="0"></div>
-        <button class="btn btn-primary" id="submitBtn" onclick="simpan()" style="height:44px">Catat</button>
-      </div>
-    </div>
-
-    <div class="card table-card">
-      <div class="table-header"><div class="card-title">Log Transaksi</div><div id="txCount" style="font-size:11px; color:var(--text3)">0 item</div></div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Tanggal</th><th>Kategori</th><th>Deskripsi</th><th style="text-align:right">Nominal</th><th style="text-align:center">Aksi</th></tr></thead>
-          <tbody id="tableBody"></tbody>
-        </table>
-      </div>
-    </div>
-  </main>
-</div>
-
-<script>
-const API = "https://finance-worker.ebeneserpinem6.workers.dev";
-const TARGET_DANA = 20000000;
-let gaugeChart = null, lineChart = null;
+</style></head><body><div class="ambient ambient-1"></div><div class="ambient ambient-2"></div><div class="toast-wrap" id="toastWrap"></div>< !-- ═══ LOGIN SCREEN ═══ --><div id="auth-screen"><div class="auth-box"><div class="auth-logo"><span>P</span>inem<span>.</span></div><div class="auth-sub">Manajemen Keuangan Eben</div><div class="login-form"><div class="form-group"><label>Username</label><input type="text" id="login-user" class="form-control" placeholder="Admin"></div><div class="form-group"><label>Password</label><input type="password" id="login-pass" class="form-control" placeholder="••••••••" onkeydown="if(event.key==='Enter') handleLogin()"></div><button class="btn btn-primary" onclick="handleLogin()" style="width:100%; margin-top:10px; height:45px;">Masuk Vault</button><div id="login-error" style="color:var(--red); font-size:12px; text-align:center; height:15px; margin-top:5px;"></div></div></div></div>< !-- ═══ APP SHELL ═══ --><div id="app" style="display:none; flex:1;"><aside class="sidebar"><div class="sidebar-logo"><span>P</span>inem<span>.</span><em>Financial Vault v2.5</em></div><div class="nav-section">Utama</div><div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>Dashboard</div><div class="sidebar-footer"><div class="user-chip" onclick="logout()"><div class="user-avatar">A</div><div class="user-info"><div class="user-name">Admin User</div><div class="user-role">Klik untuk Keluar</div></div></div></div></aside><main><div class="topbar"><div class="topbar-left"><h1>Keuangan Pinem</h1><p id="greeting">Memuat...</p></div><div class="topbar-right"><div class="filter-container"><select id="filterMonth" class="filter-select" onchange="refresh()"><option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option><option value="3">April</option><option value="4">Mei</option><option value="5">Juni</option><option value="6">Juli</option><option value="7">Agustus</option><option value="8">September</option><option value="9">Oktober</option><option value="10">November</option><option value="11">Desember</option></select><select id="filterYear" class="filter-select" onchange="refresh()"></select></div><button class="btn btn-ghost" onclick="refresh()">Refresh</button></div></div><div class="stats-row"><div class="stat-card"><div class="stat-icon green">💰</div><div class="stat-label">Total Aset</div><div class="stat-value green" id="v-asset">Rp 0</div></div><div class="stat-card"><div class="stat-icon red">📉</div><div class="stat-label">Total Pengeluaran</div><div class="stat-value red" id="v-exp">Rp 0</div></div><div class="stat-card"><div class="stat-icon blue">⚖️</div><div class="stat-label">Kas Tersedia</div><div class="stat-value blue" id="v-net">Rp 0</div></div></div><div class="grid2"><div class="card"><div class="card-title">Dana Darurat</div><div class="fund-row"><div class="gauge-wrap"><canvas id="gaugeChart"></canvas><div class="gauge-center"><div class="gauge-pct" id="perc-text">0%</div></div></div><div style="flex:1"><div class="stat-label">Target Dana Rp 20jt</div><div id="target-msg" style="font-size:12px; color:var(--text2); line-height:1.4">Memuat...</div></div></div></div><div class="card"><div class="card-title">Tren Saldo Harian</div><div class="chart-wrap"><canvas id="lineChart"></canvas></div></div></div><div class="card" style="margin-bottom:24px;"><div class="card-title">Input Transaksi</div><div class="form-row"><div class="form-group"><label>Kategori</label><select class="form-control" id="f-kat"><option value="pemasukan">💚 Pemasukan</option><option value="pengeluaran">🔴 Pengeluaran</option><option value="investasi">🔵 Investasi</option><option value="dana_darurat">🟡 Dana Darurat</option></select></div><div class="form-group"><label>Deskripsi</label><input type="text" class="form-control" id="f-desc" placeholder="Gaji, Investasi, dll"></div><div class="form-group"><label>Nominal</label><input type="number" class="form-control" id="f-amt" placeholder="0"></div><button class="btn btn-primary" id="submitBtn" onclick="simpan()" style="height:44px">Catat</button></div></div><div class="card table-card"><div class="table-header"><div class="card-title">Log Transaksi</div><div id="txCount" style="font-size:11px; color:var(--text3)">0 item</div></div><div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>Kategori</th><th>Deskripsi</th><th style="text-align:right">Nominal</th><th style="text-align:center">Aksi</th></tr></thead><tbody id="tableBody"></tbody></table></div></div></main></div><script>const API="https://finance-worker.ebeneserpinem6.workers.dev";
+const TARGET_DANA=20000000;
+let gaugeChart=null,
+lineChart=null;
 
 // ═══════════════════════════════════════════
 // LOGIN SYSTEM
 // ═══════════════════════════════════════════
 function handleLogin() {
-  const user = document.getElementById("login-user").value;
-  const pass = document.getElementById("login-pass").value;
-  if (user === "Admin" && pass === "Pinem123") {
-    localStorage.setItem("sentinel_auth", "true");
-    initApp();
-  } else {
-    document.getElementById("login-error").textContent = "Username/Password Salah!";
-  }
+    const user=document.getElementById("login-user").value;
+    const pass=document.getElementById("login-pass").value;
+
+    if (user==="Admin" && pass==="Pinem123") {
+        localStorage.setItem("sentinel_auth", "true");
+        initApp();
+    }
+
+    else {
+        document.getElementById("login-error").textContent="Username/Password Salah!";
+    }
 }
 
 function checkAuth() {
-    localStorage.removeItem("sentinel_auth");
+    if (localStorage.getItem("sentinel_auth")) initApp();
 }
 
 function logout() {
     localStorage.removeItem("sentinel_auth");
-  location.reload();
+    location.reload();
 }
 
 // ═══════════════════════════════════════════
 // CORE LOGIC
 // ═══════════════════════════════════════════
 function initApp() {
-  document.getElementById("auth-screen").style.display = "none";
-  document.getElementById("app").style.display = "flex";
-  
-  const now = new Date();
-  document.getElementById("filterMonth").value = now.getMonth();
-  const yearSelect = document.getElementById("filterYear");
-  for(let i = now.getFullYear(); i >= now.getFullYear() - 2; i--) {
-    const opt = document.createElement("option"); opt.value = i; opt.textContent = i;
-    yearSelect.appendChild(opt);
-  }
+    document.getElementById("auth-screen").style.display="none";
+    document.getElementById("app").style.display="flex";
 
-  document.getElementById("greeting").textContent = now.toLocaleDateString("id-ID", { weekday:"long", day:"numeric", month:"long", year:"numeric" });
-  refresh();
+    const now=new Date();
+    // Periode tanggal 26: jika hari ini >= 26, kita masuk ke periode bulan berikutnya
+    let periodMonth=now.getMonth();
+    let periodYear=now.getFullYear();
+    if (now.getDate() >= 26) {
+        periodMonth++;
+        if (periodMonth > 11) { periodMonth=0; periodYear++; }
+    }
+    document.getElementById("filterMonth").value=periodMonth;
+    const yearSelect=document.getElementById("filterYear");
+    const startYear=Math.min(now.getFullYear(), periodYear);
+    const endYear=Math.max(now.getFullYear(), periodYear);
+    for(let i=endYear; i >= startYear - 2; i--) {
+        const opt=document.createElement("option");
+        opt.value=i;
+        opt.textContent=i;
+        yearSelect.appendChild(opt);
+    }
+    yearSelect.value=periodYear;
+
+    document.getElementById("greeting").textContent=now.toLocaleDateString("id-ID", {
+        weekday:"long", day:"numeric", month:"long", year:"numeric"
+    });
+refresh();
 }
 
 async function refresh() {
-  try {
-    const selMonth = parseInt(document.getElementById("filterMonth").value);
-    const selYear  = parseInt(document.getElementById("filterYear").value);
-    const bulanStr = `${selYear}-${String(selMonth + 1).padStart(2, '0')}`;
+    try {
+        const selMonth=parseInt(document.getElementById("filterMonth").value);
+        const selYear=parseInt(document.getElementById("filterYear").value);
 
-    const resData = await fetch(API + "/api/data");
-    const stats   = await resData.json();
-    document.getElementById("v-asset").textContent = "Rp " + stats.totalAsset.toLocaleString("id-ID");
-    document.getElementById("v-exp").textContent   = "Rp " + stats.pengeluaran.toLocaleString("id-ID");
-    document.getElementById("v-net").textContent   = "Rp " + stats.saldoBersih.toLocaleString("id-ID");
-    updateGauge(stats.dana_darurat);
+        // Periode tanggal 26: dari tgl 26 bulan lalu s/d tgl 25 bulan ini
+        const startDate=new Date(selYear, selMonth - 1, 26);
+        const endDate=new Date(selYear, selMonth, 25);
+        const startStr=startDate.toISOString().split('T')[0];
+        const endStr=endDate.toISOString().split('T')[0];
 
-    const resTx    = await fetch(`${API}/api/transaksi?bulan=${bulanStr}`);
-    const filtered = await resTx.json();
-    updateTable(filtered);
-    updateLineChart(filtered);
+        const resData=await fetch(API + "/api/data");
+        const stats=await resData.json();
+        document.getElementById("v-asset").textContent="Rp "+stats.totalAsset.toLocaleString("id-ID");
+        document.getElementById("v-exp").textContent="Rp "+stats.pengeluaran.toLocaleString("id-ID");
+        document.getElementById("v-net").textContent="Rp "+stats.saldoBersih.toLocaleString("id-ID");
+        updateGauge(stats.dana_darurat);
 
-  } catch (e) {
-    toast("Koneksi Error", "error");
-  }
+        const resTx=await fetch(`${API}/api/transaksi?start=${startStr}&end=${endStr}`);
+        const filtered=await resTx.json();
+        updateTable(filtered);
+        updateLineChart(filtered);
+
+    } catch (e) {
+        toast("Koneksi Error", "error");
+    }
 }
 
 // ═══════════════════════════════════════════
 // UI COMPONENTS
 // ═══════════════════════════════════════════
 function updateLineChart(data) {
-  const ctx = document.getElementById("lineChart");
-  if (lineChart) lineChart.destroy();
+    const ctx=document.getElementById("lineChart");
+    if (lineChart) lineChart.destroy();
 
-  const sorted = [...data].sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
-  let cumulativeLiquidity = 0;
+    const sorted=[...data].sort((a, b)=> new Date(a.tanggal) - new Date(b.tanggal));
+    let cumulativeLiquidity=0;
 
-  const labels = sorted.map(t => new Date(t.tanggal).toLocaleDateString("id-ID", { day: "numeric", month: "short" }));
-  const values = sorted.map(t => {
-    const impact = t.kategori === "pemasukan" ? t.jumlah : t.kategori === "pengeluaran" ? -t.jumlah : 0;
-    cumulativeLiquidity += impact;
-    return cumulativeLiquidity;
-  });
+    const labels=sorted.map(t=> new Date(t.tanggal).toLocaleDateString("id-ID", {
+            day: "numeric", month: "short"
+        }));
 
-  lineChart = new Chart(ctx, {
+const values=sorted.map(t=> {
+        const impact=t.kategori==="pemasukan" ? t.jumlah : t.kategori==="pengeluaran" ? -t.jumlah : 0;
+        cumulativeLiquidity +=impact;
+        return cumulativeLiquidity;
+    });
+
+lineChart=new Chart(ctx, {
+
     type: "line",
     data: {
-      labels,
-      datasets: [{
-        label: "Cashflow",
-        data: values,
-        borderColor: "#6366f1",
-        backgroundColor: "rgba(99,102,241,0.1)",
-        fill: true, tension: 0.4, borderWidth: 2, pointRadius: 3
-      }]
-    },
-    options: {
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: { display: true, ticks: { color: "#4a5568", font: { size: 9 }, callback: v => "Rp " + (v / 1000) + "k" }, grid: { color: "rgba(255,255,255,0.05)" } },
-        x: { display: true, ticks: { color: "#4a5568", font: { size: 9 } }, grid: { display: false } }
-      }
+
+        labels,
+        datasets: [ {
+            label: "Cashflow",
+            data: values,
+            borderColor: "#6366f1",
+            backgroundColor: "rgba(99,102,241,0.1)",
+            fill: true, tension: 0.4, borderWidth: 2, pointRadius: 3
+        }
+
+        ]
     }
-  });
+
+    ,
+    options: {
+
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            },
+            scales: {
+                y: {
+                    display: true,
+                    ticks: {color:"#4a5568",font:{size:9},callback:v=>"Rp "+(v/1000)+"k"},
+                    grid: {color:"rgba(255,255,255,0.05)"}
+                },
+                x: {
+                    display: true,
+                    ticks: {color:"#4a5568",font:{size:9}},
+                    grid: {display:false}
+                }
+            }
+        }
+    }
+});
 }
 
 function updateTable(list) {
-  const body = document.getElementById("tableBody");
-  document.getElementById("txCount").textContent = list.length + " item";
-  const pillMap = { pemasukan:"pill-in", pengeluaran:"pill-out", investasi:"pill-invest", dana_darurat:"pill-dana" };
-  body.innerHTML = list.sort((a,b) => new Date(b.tanggal) - new Date(a.tanggal)).map(t => `
-    <tr>
-      <td style="font-family:var(--font-mono); font-size:12px">${new Date(t.tanggal).toLocaleDateString("id-ID")}</td>
-      <td><span class="pill ${pillMap[t.kategori]}">${t.kategori.replace('_',' ')}</span></td>
-      <td style="font-weight:500">${t.deskripsi}</td>
-      <td style="text-align:right; font-family:var(--font-mono); color:${t.kategori==='pemasukan'?'var(--green)':'var(--red)'}">
-        Rp ${t.jumlah.toLocaleString("id-ID")}
-      </td>
-      <td style="text-align:center"><button class="del-btn" onclick="hapus('${t.id}')">✕</button></td>
-    </tr>
-  `).join("") || `<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text3)">Data bulan ini kosong</td></tr>`;
+    const body=document.getElementById("tableBody");
+    document.getElementById("txCount").textContent=list.length+" item";
+    const pillMap={pemasukan:"pill-in",pengeluaran:"pill-out",investasi:"pill-invest",dana_darurat:"pill-dana"};
+    const colorMap={pemasukan:"var(--green)",pengeluaran:"var(--red)",investasi:"var(--accent2)",dana_darurat:"var(--amber)"};
+    body.innerHTML=list.sort((a,b)=>new Date(b.tanggal)-new Date(a.tanggal)).map(t=>`
+        <tr>
+            <td style="font-family:var(--font-mono);font-size:12px">${new Date(t.tanggal).toLocaleDateString("id-ID")}</td>
+            <td><span class="pill ${pillMap[t.kategori]}">${t.kategori.replace("_"," ")}</span></td>
+            <td style="font-weight:500">${t.deskripsi}</td>
+            <td style="text-align:right;font-family:var(--font-mono);color:${colorMap[t.kategori]||'var(--red)'}">Rp ${t.jumlah.toLocaleString("id-ID")}</td>
+            <td style="text-align:center"><button class="del-btn" onclick="hapus('${t.id}')">✕</button></td>
+        </tr>`).join("")||`<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text3)">Data periode ini kosong</td></tr>`;
 }
 
 function updateGauge(val) {
-  const pct = Math.min(Math.round((val / TARGET_DANA) * 100), 100);
-  document.getElementById("perc-text").textContent = pct + "%";
-  document.getElementById("target-msg").innerHTML = val >= TARGET_DANA ? "<strong>Target Tercapai!</strong>" : `Kurang Rp ${(TARGET_DANA-val).toLocaleString()} lagi.`;
-  const ctx = document.getElementById("gaugeChart");
-  if (gaugeChart) gaugeChart.destroy();
-  gaugeChart = new Chart(ctx, {
-    type: "doughnut",
-    data: { datasets: [{ data: [val, Math.max(0, TARGET_DANA - val)], backgroundColor: ["#6366f1", "rgba(255,255,255,0.05)"], borderWidth: 0 }] },
-    options: { cutout: "80%", plugins: { tooltip: { enabled: false } } }
-  });
+    const pct=Math.min(Math.round((val / TARGET_DANA) * 100), 100);
+    document.getElementById("perc-text").textContent=pct+"%";
+
+    document.getElementById("target-msg").innerHTML=val>=TARGET_DANA ? "<strong>Target Tercapai!</strong>" : `Kurang Rp ${(TARGET_DANA-val).toLocaleString()} lagi.`;
+    const ctx=document.getElementById("gaugeChart");
+    if (gaugeChart) gaugeChart.destroy();
+
+    gaugeChart=new Chart(ctx, {
+
+        type: "doughnut",
+        data: {
+            datasets: [ {
+                data: [val, Math.max(0, TARGET_DANA - val)], backgroundColor: ["#6366f1", "rgba(255,255,255,0.05)"], borderWidth: 0
+            }
+
+            ]
+        }
+
+        ,
+        options: {
+            cutout: "80%", plugins: {
+                tooltip: {
+                    enabled: false
+                }
+            }
+        }
+    });
 }
 
 // ═══════════════════════════════════════════
 // ACTIONS
 // ═══════════════════════════════════════════
 async function simpan() {
-  const desc = document.getElementById("f-desc").value;
-  const amt  = document.getElementById("f-amt").value;
-  if (!desc || !amt) return toast("Lengkapi data!", "error");
+    const desc=document.getElementById("f-desc").value;
+    const amt=document.getElementById("f-amt").value;
+    if ( !desc || !amt) return toast("Lengkapi data!", "error");
 
-  const btn = document.getElementById("submitBtn");
-  btn.disabled = true;
-  btn.innerHTML = `<span class="spinner"></span>`;
+    const btn=document.getElementById("submitBtn");
+    btn.disabled=true;
+    btn.innerHTML=`<span class="spinner"></span>`;
 
-  try {
-    await fetch(API + "/api/tambah", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        deskripsi: desc,
-        jumlah: parseFloat(amt),
-        kategori: document.getElementById("f-kat").value,
-        sumber: "manual"  // ✅ FIX: tandai sebagai manual, Worker akan generate email_id unik
-      })
+    try {
+        await fetch(API + "/api/tambah", {
+
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            }
+
+            ,
+            body: JSON.stringify({
+                deskripsi: desc,
+                jumlah: parseFloat(amt),
+                kategori: document.getElementById("f-kat").value,
+                sumber: "manual" // ✅ FIX: tandai sebagai manual, Worker akan generate email_id unik
+            })
     });
-    document.getElementById("f-desc").value = "";
-    document.getElementById("f-amt").value  = "";
-    toast("Tersimpan!", "success");
-    refresh();
-  } catch (e) { toast("Gagal simpan", "error"); }
-  finally { btn.disabled = false; btn.innerHTML = "Catat"; }
+document.getElementById("f-desc").value="";
+document.getElementById("f-amt").value="";
+toast("Tersimpan!", "success");
+refresh();
+}
+
+catch (e) {
+    toast("Gagal simpan", "error");
+}
+
+finally {
+    btn.disabled=false;
+    btn.innerHTML="Catat";
+}
 }
 
 async function hapus(id) {
-  if (!confirm("Hapus transaksi ini?")) return;
-  await fetch(`${API}/api/hapus?id=${id}`, { method: "DELETE" });
-  refresh();
+    if (!confirm("Hapus transaksi ini?")) return;
+    await fetch(`${API}/api/hapus?id=${id}`, {method:"DELETE"});
+    refresh();
 }
 
 function toast(msg, type) {
-  const wrap = document.getElementById("toastWrap");
-  const el   = document.createElement("div");
-  el.className = `toast ${type}`;
-  el.textContent = msg;
-  wrap.appendChild(el);
-  setTimeout(() => { el.style.opacity = "0"; setTimeout(() => el.remove(), 500); }, 3000);
+    const wrap=document.getElementById("toastWrap");
+    const el=document.createElement("div");
+    el.className=`toast ${type}`;
+    el.textContent=msg;
+    wrap.appendChild(el);
+    setTimeout(()=>{el.style.opacity="0";setTimeout(()=>el.remove(),500);},3000);
 }
 
-window.onload = checkAuth;
-</script>
-</body>
-</html>
+window.onload=checkAuth;
+</script></body></html>
