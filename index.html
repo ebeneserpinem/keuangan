@@ -134,6 +134,33 @@ body::before {
     gap: 16px;
 }
 
+/* ─── EDIT MODAL ─── */
+#edit-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.edit-box {
+    width: 380px;
+    padding: 32px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    animation: fadeUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.edit-header {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 24px;
+}
+
 /* ─── SIDEBAR ─── */
 .sidebar {
     width: var(--sidebar);
@@ -703,7 +730,36 @@ tbody td {
     cursor: pointer;
 }
 
-</style></head><body><div class="ambient ambient-1"></div><div class="ambient ambient-2"></div><div class="toast-wrap" id="toastWrap"></div><!-- ═══ LOGIN SCREEN ═══ --><div id="auth-screen"><div class="auth-box"><div class="auth-logo"><span>P</span>inem<span>.</span></div><div class="auth-sub">Manajemen Keuangan Eben</div><div class="login-form"><div class="form-group"><label>Username</label><input type="text" id="login-user" class="form-control" placeholder="Admin"></div><div class="form-group"><label>Password</label><input type="password" id="login-pass" class="form-control" placeholder="••••••••" onkeydown="if(event.key==='Enter') handleLogin()"></div><button class="btn btn-primary" onclick="handleLogin()" style="width:100%; margin-top:10px; height:45px;">Masuk Vault</button><div id="login-error" style="color:var(--red); font-size:12px; text-align:center; height:15px; margin-top:5px;"></div></div></div></div><!-- ═══ APP SHELL ═══ --><div id="app" style="display:none; flex:1;"><aside class="sidebar"><div class="sidebar-logo"><span>P</span>inem<span>.</span><em>Financial Vault v2.5</em></div><div class="nav-section">Utama</div><div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>Dashboard</div><div class="sidebar-footer"><div class="user-chip" onclick="logout()"><div class="user-avatar">A</div><div class="user-info"><div class="user-name">Admin User</div><div class="user-role">Klik untuk Keluar</div></div></div></div></aside><main><div class="topbar"><div class="topbar-left"><h1>Keuangan Pinem</h1><p id="greeting">Memuat...</p></div><div class="topbar-right"><div class="filter-container"><select id="filterMonth" class="filter-select" onchange="refresh()"><option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option><option value="3">April</option><option value="4">Mei</option><option value="5">Juni</option><option value="6">Juli</option><option value="7">Agustus</option><option value="8">September</option><option value="9">Oktober</option><option value="10">November</option><option value="11">Desember</option></select><select id="filterYear" class="filter-select" onchange="refresh()"></select></div><button class="btn btn-ghost" onclick="refresh()">Refresh</button><button class="btn btn-primary" onclick="generatePDF()" style="gap:6px">📄 PDF</button></div></div><div class="stats-row"><div class="stat-card"><div class="stat-icon green">💰</div><div class="stat-label">Total Aset</div><div class="stat-value green" id="v-asset">Rp 0</div></div><div class="stat-card"><div class="stat-icon red">📉</div><div class="stat-label">Pengeluaran Periode</div><div class="stat-value red" id="v-exp">Rp 0</div></div><div class="stat-card"><div class="stat-icon blue">⚖️</div><div class="stat-label">Kas Periode</div><div class="stat-value blue" id="v-net">Rp 0</div></div></div><div class="grid2"><div class="card"><div class="card-title">Dana Darurat</div><div class="fund-row"><div class="gauge-wrap"><canvas id="gaugeChart"></canvas><div class="gauge-center"><div class="gauge-pct" id="perc-text">0%</div></div></div><div style="flex:1"><div class="stat-label">Target Dana Rp 20jt</div><div id="target-msg" style="font-size:12px; color:var(--text2); line-height:1.4">Memuat...</div></div></div></div><div class="card"><div class="card-title">Tren Saldo Harian</div><div class="chart-wrap"><canvas id="lineChart"></canvas></div></div></div><div class="card" style="margin-bottom:24px;"><div class="card-title">Input Transaksi</div><div class="form-row"><div class="form-group"><label>Kategori</label><select class="form-control" id="f-kat"><option value="pemasukan">💚 Pemasukan</option><option value="pengeluaran">🔴 Pengeluaran</option><option value="investasi">🔵 Investasi</option><option value="dana_darurat">🟡 Dana Darurat</option></select></div><div class="form-group"><label>Deskripsi</label><input type="text" class="form-control" id="f-desc" placeholder="Gaji, Investasi, dll"></div><div class="form-group"><label>Nominal</label><input type="number" class="form-control" id="f-amt" placeholder="0"></div><button class="btn btn-primary" id="submitBtn" onclick="simpan()" style="height:44px">Catat</button></div></div><div class="card table-card"><div class="table-header"><div class="card-title">Log Transaksi</div><div id="txCount" style="font-size:11px; color:var(--text3)">0 item</div></div><div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>Kategori</th><th>Deskripsi</th><th style="text-align:right">Nominal</th><th style="text-align:center">Aksi</th></tr></thead><tbody id="tableBody"></tbody></table></div></div></main></div><script>const API="https://finance-worker.ebeneserpinem6.workers.dev";
+</style></head><body><div class="ambient ambient-1"></div><div class="ambient ambient-2"></div><div class="toast-wrap" id="toastWrap"></div><!-- ═══ LOGIN SCREEN ═══ --><div id="auth-screen"><div class="auth-box"><div class="auth-logo"><span>P</span>inem<span>.</span></div><div class="auth-sub">Manajemen Keuangan Eben</div><div class="login-form"><div class="form-group"><label>Username</label><input type="text" id="login-user" class="form-control" placeholder="Admin"></div><div class="form-group"><label>Password</label><input type="password" id="login-pass" class="form-control" placeholder="••••••••" onkeydown="if(event.key==='Enter') handleLogin()"></div><button class="btn btn-primary" onclick="handleLogin()" style="width:100%; margin-top:10px; height:45px;">Masuk Vault</button><div id="login-error" style="color:var(--red); font-size:12px; text-align:center; height:15px; margin-top:5px;"></div></div></div></div>
+
+<!-- ═══ EDIT MODAL ═══ -->
+<div id="edit-modal">
+    <div class="edit-box">
+        <div class="edit-header">Edit Transaksi</div>
+        <div class="login-form">
+            <input type="hidden" id="edit-id">
+            <div class="form-group">
+                <label>Kategori</label>
+                <select class="form-control" id="edit-kat">
+                    <option value="pemasukan">💚 Pemasukan</option>
+                    <option value="pengeluaran">🔴 Pengeluaran</option>
+                    <option value="investasi">🔵 Investasi</option>
+                    <option value="dana_darurat">🟡 Dana Darurat</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Deskripsi</label>
+                <input type="text" class="form-control" id="edit-desc">
+            </div>
+            <div style="display:flex; gap:10px; margin-top:10px">
+                <button class="btn btn-ghost" onclick="tutupEdit()" style="flex:1">Batal</button>
+                <button class="btn btn-primary" id="btn-simpan-edit" onclick="simpanEdit()" style="flex:1">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ APP SHELL ═══ --><div id="app" style="display:none; flex:1;"><aside class="sidebar"><div class="sidebar-logo"><span>P</span>inem<span>.</span><em>Financial Vault v2.5</em></div><div class="nav-section">Utama</div><div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>Dashboard</div><div class="sidebar-footer"><div class="user-chip" onclick="logout()"><div class="user-avatar">A</div><div class="user-info"><div class="user-name">Admin User</div><div class="user-role">Klik untuk Keluar</div></div></div></div></aside><main><div class="topbar"><div class="topbar-left"><h1>Keuangan Pinem</h1><p id="greeting">Memuat...</p></div><div class="topbar-right"><div class="filter-container"><select id="filterMonth" class="filter-select" onchange="refresh()"><option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option><option value="3">April</option><option value="4">Mei</option><option value="5">Juni</option><option value="6">Juli</option><option value="7">Agustus</option><option value="8">September</option><option value="9">Oktober</option><option value="10">November</option><option value="11">Desember</option></select><select id="filterYear" class="filter-select" onchange="refresh()"></select></div><button class="btn btn-ghost" onclick="refresh()">Refresh</button><button class="btn btn-primary" onclick="generatePDF()" style="gap:6px">📄 PDF</button></div></div><div class="stats-row"><div class="stat-card"><div class="stat-icon green">💰</div><div class="stat-label">Total Aset</div><div class="stat-value green" id="v-asset">Rp 0</div></div><div class="stat-card"><div class="stat-icon red">📉</div><div class="stat-label">Pengeluaran Periode</div><div class="stat-value red" id="v-exp">Rp 0</div></div><div class="stat-card"><div class="stat-icon blue">⚖️</div><div class="stat-label">Kas Periode</div><div class="stat-value blue" id="v-net">Rp 0</div></div></div><div class="grid2"><div class="card"><div class="card-title">Dana Darurat</div><div class="fund-row"><div class="gauge-wrap"><canvas id="gaugeChart"></canvas><div class="gauge-center"><div class="gauge-pct" id="perc-text">0%</div></div></div><div style="flex:1"><div class="stat-label">Target Dana Rp 20jt</div><div id="target-msg" style="font-size:12px; color:var(--text2); line-height:1.4">Memuat...</div></div></div></div><div class="card"><div class="card-title">Tren Saldo Harian</div><div class="chart-wrap"><canvas id="lineChart"></canvas></div></div></div><div class="card" style="margin-bottom:24px;"><div class="card-title">Input Transaksi</div><div class="form-row"><div class="form-group"><label>Kategori</label><select class="form-control" id="f-kat"><option value="pemasukan">💚 Pemasukan</option><option value="pengeluaran">🔴 Pengeluaran</option><option value="investasi">🔵 Investasi</option><option value="dana_darurat">🟡 Dana Darurat</option></select></div><div class="form-group"><label>Deskripsi</label><input type="text" class="form-control" id="f-desc" placeholder="Gaji, Investasi, dll"></div><div class="form-group"><label>Nominal</label><input type="number" class="form-control" id="f-amt" placeholder="0"></div><button class="btn btn-primary" id="submitBtn" onclick="simpan()" style="height:44px">Catat</button></div></div><div class="card table-card"><div class="table-header"><div class="card-title">Log Transaksi</div><div id="txCount" style="font-size:11px; color:var(--text3)">0 item</div></div><div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>Kategori</th><th>Deskripsi</th><th style="text-align:right">Nominal</th><th style="text-align:center">Aksi</th></tr></thead><tbody id="tableBody"></tbody></table></div></div></main></div><script>const API="https://finance-worker.ebeneserpinem6.workers.dev";
 const TARGET_DANA=20000000;
 let gaugeChart=null,
 lineChart=null;
@@ -735,11 +791,32 @@ function logout() {
 }
 
 // ═══════════════════════════════════════════
+// IDLE TIMEOUT (5 MENIT)
+// ═══════════════════════════════════════════
+let idleTimer = null;
+function resetIdleTimer() {
+    if (idleTimer) clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => {
+        logout();
+    }, 300000); // 5 menit = 300000 ms
+}
+function startIdleTracking() {
+    resetIdleTimer();
+    window.addEventListener("mousemove", resetIdleTimer);
+    window.addEventListener("keydown", resetIdleTimer);
+    window.addEventListener("click", resetIdleTimer);
+    window.addEventListener("scroll", resetIdleTimer);
+}
+
+// ═══════════════════════════════════════════
 // CORE LOGIC
 // ═══════════════════════════════════════════
 function initApp() {
     document.getElementById("auth-screen").style.display="none";
     document.getElementById("app").style.display="flex";
+    
+    startIdleTracking(); // Mulai hitung mundur 5 menit
+
 
     const now=new Date();
     // Periode tanggal 26: jika hari ini >= 26, kita masuk ke periode bulan berikutnya
@@ -790,20 +867,26 @@ async function refresh() {
         const filtered=await resTx.json();
 
         // Hitung pengeluaran & kas dari data periode saja (bukan all-time)
-        let periodPemasukan=0, periodPengeluaran=0;
+        let periodPemasukan=0, periodPengeluaran=0, periodInvestasi=0, periodDanaDarurat=0;
         filtered.forEach(t=>{
             const jml=parseFloat(t.jumlah)||0;
             if(t.kategori==='pemasukan') periodPemasukan+=jml;
-            if(t.kategori==='pengeluaran') periodPengeluaran+=jml;
+            else if(t.kategori==='pengeluaran') periodPengeluaran+=jml;
+            else if(t.kategori==='investasi') periodInvestasi+=jml;
+            else if(t.kategori==='dana_darurat') periodDanaDarurat+=jml;
         });
-        document.getElementById("v-exp").textContent="Rp "+periodPengeluaran.toLocaleString("id-ID");
-        document.getElementById("v-net").textContent="Rp "+(periodPemasukan-periodPengeluaran).toLocaleString("id-ID");
+        
+        const totalOutflow = periodPengeluaran + periodInvestasi + periodDanaDarurat;
+        const kasTersedia = periodPemasukan - totalOutflow;
+        
+        document.getElementById("v-exp").textContent="Rp "+totalOutflow.toLocaleString("id-ID");
+        document.getElementById("v-net").textContent="Rp "+kasTersedia.toLocaleString("id-ID");
 
         updateTable(filtered);
         updateLineChart(filtered);
 
         // Simpan data periode aktif untuk fitur PDF
-        window._periodData={startStr,endStr,filtered,periodPemasukan,periodPengeluaran,totalAsset:stats.totalAsset};
+        window._periodData={startStr,endStr,filtered,periodPemasukan,totalOutflow,kasTersedia,totalAsset:stats.totalAsset};
 
     } catch (e) {
         toast("Koneksi Error", "error");
@@ -883,7 +966,10 @@ function updateTable(list) {
             <td><span class="pill ${pillMap[t.kategori]}">${t.kategori.replace("_"," ")}</span></td>
             <td style="font-weight:500">${t.deskripsi}</td>
             <td style="text-align:right;font-family:var(--font-mono);color:${colorMap[t.kategori]||'var(--red)'}">Rp ${t.jumlah.toLocaleString("id-ID")}</td>
-            <td style="text-align:center"><button class="del-btn" onclick="hapus('${t.id}')">✕</button></td>
+            <td style="text-align:center; white-space:nowrap;">
+                <button class="del-btn" style="margin-right:4px;" onclick="bukaEdit('${t.id}', '${t.kategori}', '${t.deskripsi.replace(/'/g, "\\'")}')">✏️</button>
+                <button class="del-btn" onclick="hapus('${t.id}')">✕</button>
+            </td>
         </tr>`).join("")||`<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text3)">Data periode ini kosong</td></tr>`;
 }
 
@@ -920,6 +1006,45 @@ function updateGauge(val) {
 // ═══════════════════════════════════════════
 // ACTIONS
 // ═══════════════════════════════════════════
+function bukaEdit(id, kategori, deskripsi) {
+    document.getElementById("edit-id").value = id;
+    document.getElementById("edit-kat").value = kategori;
+    document.getElementById("edit-desc").value = deskripsi;
+    document.getElementById("edit-modal").style.display = "flex";
+}
+
+function tutupEdit() {
+    document.getElementById("edit-modal").style.display = "none";
+}
+
+async function simpanEdit() {
+    const id = document.getElementById("edit-id").value;
+    const kategori = document.getElementById("edit-kat").value;
+    const deskripsi = document.getElementById("edit-desc").value;
+
+    if (!id || !deskripsi) return toast("Deskripsi tidak boleh kosong!", "error");
+
+    const btn = document.getElementById("btn-simpan-edit");
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spinner"></span>`;
+
+    try {
+        await fetch(API + "/api/edit", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, kategori, deskripsi })
+        });
+        toast("Berhasil diubah!", "success");
+        tutupEdit();
+        refresh();
+    } catch (e) {
+        toast("Gagal mengubah", "error");
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = "Simpan";
+    }
+}
+
 async function simpan() {
     const desc=document.getElementById("f-desc").value;
     const amt=document.getElementById("f-amt").value;
@@ -978,7 +1103,7 @@ function toast(msg, type) {
 
 function generatePDF() {
     if (!window._periodData) return toast("Refresh data dulu!", "error");
-    const {startStr,endStr,filtered,periodPemasukan,periodPengeluaran,totalAsset}=window._periodData;
+    const {startStr,endStr,filtered,periodPemasukan,totalOutflow,kasTersedia,totalAsset}=window._periodData;
     const selMonth=parseInt(document.getElementById("filterMonth").value);
     const selYear=document.getElementById("filterYear").value;
     const bulanNames=["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
@@ -1015,9 +1140,9 @@ function generatePDF() {
     doc.setTextColor(30,120,30);
     doc.text("Rp "+totalAsset.toLocaleString("id-ID"),41,58,{align:"center"});
     doc.setTextColor(200,30,30);
-    doc.text("Rp "+periodPengeluaran.toLocaleString("id-ID"),105,58,{align:"center"});
+    doc.text("Rp "+totalOutflow.toLocaleString("id-ID"),105,58,{align:"center"});
     doc.setTextColor(30,30,200);
-    doc.text("Rp "+(periodPemasukan-periodPengeluaran).toLocaleString("id-ID"),169,58,{align:"center"});
+    doc.text("Rp "+kasTersedia.toLocaleString("id-ID"),169,58,{align:"center"});
     doc.setTextColor(0,0,0);
 
     // Tabel transaksi
@@ -1036,7 +1161,7 @@ function generatePDF() {
         headStyles:{fillColor:[99,102,241],textColor:255,fontStyle:"bold"},
         alternateRowStyles:{fillColor:[248,248,255]},
         columnStyles:{3:{halign:"right"},0:{cellWidth:28},1:{cellWidth:28},3:{cellWidth:35}},
-        foot:[["TOTAL","","","Rp "+periodPengeluaran.toLocaleString("id-ID")]],
+        foot:[["TOTAL OUTFLOW","","","Rp "+totalOutflow.toLocaleString("id-ID")]],
         footStyles:{fillColor:[230,230,245],fontStyle:"bold",textColor:[50,50,100]}
     });
 
